@@ -1,0 +1,171 @@
+﻿@page "/CurrentPositions"
+
+
+<h4> @Message </h4>
+
+
+       
+
+@if (ShowClosePositionModal)
+{
+    <div id="exampleModal" class="modal fade show d-block" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalHead" class="modal-title">Close Position  for @CloseData.Symbol </h5>
+                    <button type="button" class="close" @onclick="CloseClosePositionModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin:15px">
+
+
+                    <label class="control-label"><span>Close Size: </span> <span>   <span>(Max Size </span><span id="maxSizeSpan" style="font-style: italic;"></span>@CloseData.MaxSize<span> )</span></span></label>
+
+                    <input id="sizeInput" @bind="CloseRequest.Size" class="form-control" style="width:70%" autocomplete="off" />
+                </div>
+                <div class="form-group" style="margin:15px">
+                    <label class="control-label">
+                        <span>Maximum Spread: </span> <span>   <span>(Current Spread </span><span id="currentSpreadSpan" style="font-style: italic;color:@CurrentSpreadSpanColor"> @CloseData.Spread</span><span> )</span></span>
+                        <span class="fa fa-info-circle" data-toggle="tooltip" data-original-title="The bot will try to enter the position with a spread better than max spread"></span>
+                    </label>
+                    <input id="minSpreadInput" @bind="CloseRequest.MinSpread" style="width:70%" class="form-control" />
+                </div>
+
+                <div class="modal-footer" style="display: initial; text-align: center;">
+                    <input id="btnSubmit" type="button" value="Close Normaly" class="btn btn-warning" @onclick="@(e => ClosePosition(e, CloseData.Symbol, false))" disabled=@IsCloseRequestDisabled />
+                    <input id="btnSubmitInstant" type="button" value="Close Instantly" class="btn btn-danger" @onclick="@(e => ClosePosition(e, CloseData.Symbol, true))" disabled=@IsCloseRequestDisabled />
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@if (ShowStatusModal)
+{
+    <div id="statusModal" class="modal fade show d-block" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalHeadStatus" class="modal-title">Request Status  @Status.PositionDemandId</h5>
+                    <button type="button" class="close" @onclick="CloseStatusModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin:15px; margin-bottom:0px; font-size:large">
+                    <label class="control-label"><span>Total Amount: </span>  <span id="totalSpan" style="font-style: italic;"></span> @Status.TotalSize <span id="symbolSpan">@Status.Symbol</span></label>
+
+                </div>
+                <div class="form-group" style="margin:15px; font-size:large">
+                    <label class="control-label"><span>Filled Amount: </span> <span> <span id="filledSpan" style="font-style: italic;"></span> @Status.Filled <span id="symbolSpan2"></span>  @Status.Symbol <span>( </span><span id="filledPercentSpan" style="font-style: italic;"></span>  @Status.FilledPercent % <span> )</span> </span></label>
+                </div>
+
+                <div class="modal-footer">
+                    <input id="btnSubmitStatus" type="button" disabled=@IsCancelRequestDisabled value="Cancel Request" class="btn btn-danger" reqId="12358" @onclick="@(e => CancelRequest(e, Status.PositionDemandId))" />
+                    <input id="btnCloseStatus" type="button" value="Close" class="btn btn-secondary" @onclick="CloseStatusModal" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="container my-4">
+
+        @foreach (var d in Positions)
+            {
+                @if(!string.IsNullOrEmpty(d.Error))
+                {
+                        <div style="color:red">@d.Symbol :   @d.Error</div>
+                }
+
+            }
+
+
+    <h4>Current Position List</h4> 
+
+    <div>
+    <button type="button"  @onclick="Refresh" aria-label="Refresh" style="background-color: aliceblue;">
+                <span class="oi oi-loop-circular" aria-hidden="true"></span> Refresh
+          </button>
+             <button type="button" class="close" @onclick="RefreshWithError" aria-label="Errors" style="background-color: bisque;">
+                <span class="oi oi-warning" aria-hidden="true"></span> Check for Errors
+          </button>
+             <span style="padding-left:20px; font-size:large; padding-right:20px;">  @StatusMessage </span>
+             @if(IsLoading)
+             {
+             <img src="/loading.gif" style="height:40px" />
+             }
+          </div>
+    </div>
+<div class="container my-4">
+
+    <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th class="th-sm">
+                    Symbol
+                </th>
+                <th class="th-sm">
+                    Size
+                </th>
+                <th class="th-sm">
+                    Value
+                </th>
+                <th class="th-sm">
+                    Current Funding
+                </th>
+                <th class="th-sm">
+                    NextFunding
+                </th>
+                <th class="th-sm">
+                    Funding Income
+                </th>
+                <th class="th-sm">
+                    Fees
+                </th>
+                <th class="th-sm">
+                    Close Cost
+                </th>
+                <th class="th-sm">
+                    PNL
+                </th>
+                <th class="th-sm">
+
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Positions)
+            {
+                <tr>
+                    <td>@d.Symbol</td>
+                    <td>@(Math.Round(d.PositionSize,4))</td>
+                    <td>$@(Math.Round(d.PositionValue,4))</td>
+                    <td>$@(Math.Round(d.CurrentFunding, 4)) (@(Math.Round(d.CurrentFundingPercent, 3))%)</td>
+                    <td>$@(Math.Round(d.NextFunding, 4)) (@(Math.Round(d.NextFundingPercent, 3))%)</td>
+                    <td>$@(Math.Round(d.TotalFundingIncome, 4))</td>
+                    <td>$@(Math.Round(d.TotalFees,4))</td>
+                    <td>$@(Math.Round(d.EstimatedCloseCost, 4))</td>
+                    <td>$@(Math.Round(d.PNL, 4))</td>
+                    <td>  <button type="button" @onclick="@(e => ShowModal(e, d.CloseInProgress, d.Symbol))" class="btn btn-@(!d.CloseInProgress ? "danger" : "warning")" style="padding-bottom:3px;padding-top:2px">@(!d.CloseInProgress ? "Close Position" : "Check Status") </button> </td>
+
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+
+
+
+
+</div>
+
+
+@code {
+
+}

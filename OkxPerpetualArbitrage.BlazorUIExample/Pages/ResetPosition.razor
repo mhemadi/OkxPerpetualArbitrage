@@ -1,0 +1,23 @@
+﻿@page "/ResetPosition"
+
+@Message
+
+<div>
+   
+</div>
+
+<div class="container my-4">
+     <h4 style="color:red">
+        Reseting will close all positions on the exchange and sell the asset on the exchange and delete records from the database for the selected symbol 
+    </h4>
+    <select class="form-select" aria-label="Default select example" style="display:inline; width:60%" @bind="SelectedValue">
+          <option selected>Select a symbol</option>
+        @foreach(string symbol in Symbols)
+        {
+              <option value=@symbol>@symbol</option>
+        }
+</select>
+
+<button type="button" class="btn btn-primary" style=" margin-left: 20px;" @onclick="@(e => Reset(e, SelectedValue))">  Reset </button>
+  <span style="padding-left:20px; font-size:large; padding-right:20px;">  @StatusMessage </span>
+    </div>

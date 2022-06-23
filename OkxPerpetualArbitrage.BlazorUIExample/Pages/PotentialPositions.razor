@@ -1,0 +1,201 @@
+﻿@page "/"
+@page "/PotentialPositions"
+
+@inherits LayoutComponentBase
+
+       
+    
+<h4> @Message </h4>
+
+    @if (ShowNewPositionModal)
+{
+    <div id="exampleModal" class="modal fade show d-block" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalHead" class="modal-title">Open New Position for @OpenData.Symbol </h5>
+                    <button type="button" class="close" @onclick="CloseNewPositionModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin:15px">
+
+
+                    <label class="control-label"><span>Position Size: </span> <span>   <span>(Max Size </span><span id="maxSizeSpan" style="font-style: italic;"></span> @OpenData.MaxSize <span> )</span></span></label>
+
+                    <input id="sizeInput" @bind="OpenRequest.Size" class="form-control" autocomplete="off" style="width:70%" />
+                </div>
+                <div class="form-group" style="margin:15px">
+                    <label class="control-label">
+                        <span>Minimum Spread: </span> <span>   <span>(Current Spread </span><span id="currentSpreadSpan" style="font-style: italic;color:@CurrentSpreadSpanColor"> @OpenData.Spread</span> <span> )</span></span>
+                        <span class="fa fa-info-circle" data-toggle="tooltip" data-original-title="The bot will try to enter the position with a spread better than min spread"></span>
+                    </label>
+                    <input id="minSpreadInput" @bind="OpenRequest.MinSpread" class="form-control" style="width:70%" />
+                </div>
+
+                <div class="modal-footer" style="display: initial; text-align: center;">
+                    <input id="btnSubmit" type="button" @onclick="@(e => OpenPosition(e, OpenData.Symbol))"  disabled=@IsOpenRequestDisabled value="Submit" class="btn btn-primary" symbol="12358"  />
+
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (ShowStatusModal)
+{
+    <div id="statusModal" class="modal fade show d-block" tabindex="-1" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalHeadStatus" class="modal-title">Request Status  @Status.PositionDemandId</h5>
+                    <button type="button" class="close" @onclick="CloseStatusModal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="form-group" style="margin:15px; margin-bottom:0px; font-size:large">
+                    <label class="control-label"><span>Total Amount: </span>  <span id="totalSpan" style="font-style: italic;"></span> @Status.TotalSize <span id="symbolSpan">@Status.Symbol</span></label>
+
+                </div>
+                <div class="form-group" style="margin:15px; font-size:large">
+                    <label class="control-label"><span>Filled Amount: </span> <span> <span id="filledSpan" style="font-style: italic;"></span> @Status.Filled <span id="symbolSpan2"></span>  @Status.Symbol <span>( </span><span id="filledPercentSpan" style="font-style: italic;"></span>  @Status.FilledPercent % <span> )</span> </span></label>
+                </div>
+
+                <div class="modal-footer">
+                    <input id="btnSubmitStatus" type="button" disabled=@IsCancelRequestDisabled value="Cancel Request" class="btn btn-danger" reqId="12358" @onclick="@(e => CancelRequest(e, Status.PositionDemandId))"  />
+                    <input id="btnCloseStatus" type="button" value="Close" class="btn btn-secondary" @onclick="CloseStatusModal" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<div class="container my-4">
+
+    <h4>Potential Position List</h4> 
+
+    <div>
+   <button type="button"  @onclick="Refresh" aria-label="Refresh" style="background-color: aliceblue;">
+                <span class="oi oi-loop-circular" aria-hidden="true"></span> Refresh
+          </button>
+
+           <span style="padding-left:20px; font-size:large; padding-right:20px;">  @StatusMessage </span>
+           @if(IsLoading)
+             {
+             <img src="/loading.gif" style="height:40px" />
+             }
+          </div>
+    </div>
+
+<div class="container my-4">
+
+    <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th class="th-sm">
+                    Symbol
+                </th>
+                <th class="th-sm">
+                    Price
+                </th>
+                <th class="th-sm">
+                    Funding
+                </th>
+                <th class="th-sm">
+                    NextFunding
+                </th>
+                <th class="th-sm">
+                    Spread
+                </th>
+                <th class="th-sm">
+                    Rating
+                </th>
+                <th class="th-sm">
+
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (PPs != null && PPs.Count > 0)
+            {
+                @foreach (var d in PPs)
+                {
+                    <tr>
+                        <td>@d.Symbol</td>
+                    <td>$@(d.MarkPrice)</td>
+                    <td>@(d.Funding)%</td>
+                    <td>@(d.NextFunding)%</td>
+                    <td>@(d.Spread)%</td>
+                    <td>@d.Rating</td>
+                    <td>  <button type="button" @onclick="@(e => ShowModal(e, d.InProgress, d.Symbol))" class="btn btn-@(!d.InProgress ? "primary" : "warning")" style="padding-bottom:3px;padding-top:2px">@(!d.InProgress ? "Open Position" : "Check Status") </button> </td>
+                </tr>
+            }
+            }
+        </tbody>
+
+    </table>
+
+
+
+
+
+</div>
+
+
+@code {
+
+    private void CloseStatusModal()
+    {
+        ShowStatusModal = false;
+    }
+    private void CloseNewPositionModal()
+    {
+        ShowNewPositionModal = false;
+    }
+    private async void ShowModal(EventArgs e, bool inprogress, string symbol)
+    {
+        if (inprogress)
+        {
+            ResetStatus();
+            IsCancelRequestDisabled = true;
+            ShowStatusModal = true;
+            await SetStatusData(symbol);
+            IsCancelRequestDisabled = false;
+            StateHasChanged();
+        }
+        else
+        {
+            ResetOpenData();
+            IsOpenRequestDisabled = true;
+            ShowNewPositionModal = true;
+            await SetOpenData(symbol);
+            IsOpenRequestDisabled = false;
+            if (OpenData.Spread < 0)
+                CurrentSpreadSpanColor = "red";
+                else
+                 CurrentSpreadSpanColor = "green";
+            StateHasChanged();
+        }
+    }
+
+    private void ResetStatus()
+    {
+        Status.Filled = 0;
+        Status.IsCanceled = false;
+        Status.Symbol = "";
+        Status.TotalSize = 0;
+    }
+
+    private void ResetOpenData()
+    {
+        CurrentSpreadSpanColor = "black";
+        OpenData.MaxSize = 0;
+        OpenData.Spread =0;
+        OpenData.Symbol = "";
+    }
+
+}

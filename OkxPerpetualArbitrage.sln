@@ -1,0 +1,77 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{28D9ED7A-1951-4BCB-8592-B53AA3387495}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "webapi", "webapi", "{9AE784C6-691D-4FCF-95C2-2DA136DEB6D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{C57F71BE-C592-44EF-8AD9-50FF0E6B6EE1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastracture", "infrastracture", "{6C1D328A-995B-415E-A1D7-4FD2EDC9C792}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.WebApi", "OkxPerpetualArbitrage.WebApi\OkxPerpetualArbitrage.WebApi.csproj", "{B37160AF-34A0-4A12-834B-8EB8A41BDCD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.Application", "OkxPerpetualArbitrage.Application\OkxPerpetualArbitrage.Application.csproj", "{0E66F767-50CA-4C59-AFE9-2029420D5DA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.Domain", "OkxPerpetualArbitrage.Domain\OkxPerpetualArbitrage.Domain.csproj", "{B76AD755-9F03-4E42-A058-739AB3AC3A60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.Persistance", "OkxPerpetualArbitrage.Persistance\OkxPerpetualArbitrage.Persistance.csproj", "{63834E8C-2746-4B37-825F-CEB15692C771}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.OkxApi", "OkxPerpetualArbitrage.OkxApi\OkxPerpetualArbitrage.OkxApi.csproj", "{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example UI", "Example UI", "{78B3D142-4020-46AD-BB22-C024A4909D82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.BlazorUIExample", "OkxPerpetualArbitrage.BlazorUIExample\OkxPerpetualArbitrage.BlazorUIExample.csproj", "{E628F09E-E8D3-41B0-85A8-EAC4EE047084}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B37160AF-34A0-4A12-834B-8EB8A41BDCD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37160AF-34A0-4A12-834B-8EB8A41BDCD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37160AF-34A0-4A12-834B-8EB8A41BDCD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37160AF-34A0-4A12-834B-8EB8A41BDCD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E66F767-50CA-4C59-AFE9-2029420D5DA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E66F767-50CA-4C59-AFE9-2029420D5DA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E66F767-50CA-4C59-AFE9-2029420D5DA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E66F767-50CA-4C59-AFE9-2029420D5DA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B76AD755-9F03-4E42-A058-739AB3AC3A60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B76AD755-9F03-4E42-A058-739AB3AC3A60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B76AD755-9F03-4E42-A058-739AB3AC3A60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B76AD755-9F03-4E42-A058-739AB3AC3A60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63834E8C-2746-4B37-825F-CEB15692C771}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63834E8C-2746-4B37-825F-CEB15692C771}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63834E8C-2746-4B37-825F-CEB15692C771}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63834E8C-2746-4B37-825F-CEB15692C771}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9AE784C6-691D-4FCF-95C2-2DA136DEB6D6} = {28D9ED7A-1951-4BCB-8592-B53AA3387495}
+		{C57F71BE-C592-44EF-8AD9-50FF0E6B6EE1} = {28D9ED7A-1951-4BCB-8592-B53AA3387495}
+		{6C1D328A-995B-415E-A1D7-4FD2EDC9C792} = {28D9ED7A-1951-4BCB-8592-B53AA3387495}
+		{B37160AF-34A0-4A12-834B-8EB8A41BDCD9} = {9AE784C6-691D-4FCF-95C2-2DA136DEB6D6}
+		{0E66F767-50CA-4C59-AFE9-2029420D5DA0} = {C57F71BE-C592-44EF-8AD9-50FF0E6B6EE1}
+		{B76AD755-9F03-4E42-A058-739AB3AC3A60} = {C57F71BE-C592-44EF-8AD9-50FF0E6B6EE1}
+		{63834E8C-2746-4B37-825F-CEB15692C771} = {6C1D328A-995B-415E-A1D7-4FD2EDC9C792}
+		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4} = {6C1D328A-995B-415E-A1D7-4FD2EDC9C792}
+		{78B3D142-4020-46AD-BB22-C024A4909D82} = {28D9ED7A-1951-4BCB-8592-B53AA3387495}
+		{E628F09E-E8D3-41B0-85A8-EAC4EE047084} = {78B3D142-4020-46AD-BB22-C024A4909D82}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {533C9339-EE7F-4C04-88EA-3EE5ACF47B6D}
+	EndGlobalSection
+EndGlobal
