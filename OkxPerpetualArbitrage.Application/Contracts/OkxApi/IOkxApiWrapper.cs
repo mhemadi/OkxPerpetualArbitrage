@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OkxPerpetualArbitrage.Application.Contracts.ApiService
+namespace OkxPerpetualArbitrage.Application.Contracts.OkxApi
 {
-    public interface IApiService
+    public interface IOkxApiWrapper
     {
         Task<bool> CancelOrder(string instrument, string orderId, int maximumTries = 0, int waitMiliSeconds = 0);
         Task<List<OKEXMarketInfo>> GetAllSymbols(int maximumTries = 0, int waitMiliSeconds = 0);

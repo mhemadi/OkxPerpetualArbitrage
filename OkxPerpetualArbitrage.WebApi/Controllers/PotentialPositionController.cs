@@ -23,7 +23,7 @@ namespace OkxPerpetualArbitrage.WebApi.Controllers
             var dto = await _mediator.Send(new GetPotentialPositionsQuery());
             return Ok(dto);
         }
-        [Route("api/potentialposition/Symbol")]
+        [Route("api/potentialposition/symbol")]
         [HttpGet]
         public async Task<IActionResult> GetSymbols()
         {

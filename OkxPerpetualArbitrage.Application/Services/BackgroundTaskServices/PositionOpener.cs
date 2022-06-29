@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
 {
+    /// <summary>
+    /// This service processes open requests in the OpenPositionProcessingChannel and opens the symbols requested
+    /// </summary>
     public class PositionOpener : IPositionOpener
     {
         private readonly ILogger<PositionOpener> _logger;

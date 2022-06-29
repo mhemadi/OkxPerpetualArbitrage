@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Helpers;
@@ -14,7 +14,10 @@ using OkxPerpetualArbitrage.Domain.Entities;
 
 namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
 {
-
+    /// <summary>
+    /// This service keeps an uptodate version of data from the exchange regarding potential positions, in the db
+    /// The data is used as a cache to prevent multiple calls to the exchage api 
+    /// </summary>
 
     public class PotentialPositionUpdater : IPotentialPositionUpdater
     {
@@ -47,7 +50,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                             reset = false;
 
                         counter++;
-                        var _apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+                        var _apiService = scope.ServiceProvider.GetRequiredService<IOkxApiWrapper>();
                         var _potentialPositionRep = scope.ServiceProvider.GetRequiredService<IPotentialPositionRepository>();
                         var positionDemandRepository = scope.ServiceProvider.GetRequiredService<IPositionDemandRepository>();
                         var ratingReposirtory = scope.ServiceProvider.GetRequiredService<IPotentialPositionRatingHistoryRepository>();
@@ -67,7 +70,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
         }
 
 
-        public async Task SavePotentialPositions(IApiService _apiService, IPotentialPositionRepository _potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository)
+        public async Task SavePotentialPositions(IOkxApiWrapper _apiService, IPotentialPositionRepository _potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository)
         {
             List<decimal> ratings = new List<decimal>();
             var symbols = await _apiService.GetAllSymbols(2, 1000);
@@ -88,7 +91,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                 var fundings = await _apiService.GetFundingRates(symbol.Instrument, 5, 100);
                 var spread = (symbol.PerpBid - symbol.SpotAsk) / ((symbol.PerpBid + symbol.SpotAsk) / 2);
                 var closeSpread = (symbol.SpotBid - symbol.PerpAsk) / ((symbol.PerpAsk + symbol.SpotBid) / 2);
-                var rateHistory = await _apiService.GetFundingHistory(symbol.Instrument, 14);
+                var rateHistory = await _apiService.GetFundingHistory(symbol.Instrument, 3,1000);
 
 
                 var ratingAvg3Days = rateHistory.Average();

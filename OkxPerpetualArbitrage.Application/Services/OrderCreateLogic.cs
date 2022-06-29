@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
@@ -16,10 +16,10 @@ namespace OkxPerpetualArbitrage.Application.Services
 
     public class OrderCreateLogic : IOrderCreateLogic
     {
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly ILogger<OrderCreateLogic> _logger;
 
-        public OrderCreateLogic(IApiService apiService, ILogger<OrderCreateLogic> logger)
+        public OrderCreateLogic(IOkxApiWrapper apiService, ILogger<OrderCreateLogic> logger)
         {
             _apiService = apiService;
             _logger = logger;

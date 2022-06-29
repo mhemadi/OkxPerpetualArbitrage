@@ -26,7 +26,6 @@ namespace OkxPerpetualArbitrage.Application
            
             service.AddAutoMapper(Assembly.GetExecutingAssembly());
             service.AddMediatR(Assembly.GetExecutingAssembly());
-            service.AddTransient<IValidator<TestDto>, TestDtoValidator>();
             service.AddTransient<IValidator<ClosePositionDto>, ClosePositionDtoValidator>();
             service.AddTransient<IValidator<OpenPositionDto>, OpenPositionDtoValidator>();
             service.AddScoped<IPositionOpenCloseValidationLogic, PositionOpenCloseValidationLogic>();
@@ -43,7 +42,7 @@ namespace OkxPerpetualArbitrage.Application
             service.AddSingleton<IOpenPositionProcessingChannel, OpenPositionProcessingChannel>();
             service.AddScoped<IInProgressDemandLogic, InProgressDemandLogic>();
             service.AddScoped<IPositionChunckSizeCalculator, PositionChunckSizeCalculator>();
-            service.AddScoped<ITotalAvailableCloseSizeCalculator, TotalAvailableCloseSizeCalculator>();
+            service.AddScoped<ITotalAvailableCloseSizeCalculatorLogic, TotalAvailableCloseSizeCalculatorLogic>();
             service.AddScoped<IPositionOpenCloseValidationLogic, PositionOpenCloseValidationLogic>();
 
             service.AddScoped<IOrderCreateLogic, OrderCreateLogic>();
@@ -54,9 +53,13 @@ namespace OkxPerpetualArbitrage.Application
             service.AddScoped<IPositionChunkCreateLogic, PositionChunkCreateLogic>();
             service.AddScoped<IPositionCloseLogic, PositionCloseLogic>();
             service.AddScoped<IPositionOpenLogic, PositionOpenLogic>();
-
-
-
+            service.AddScoped<IResetPositionLogic, ResetPositionLogic>();
+            service.AddScoped<IGetCurrentPositionsLogic, GetCurrentPositionsLogic>();
+            service.AddScoped<IPotentialPositionProcessorLogic, PotentialPositionProcessorLogic>();
+            service.AddScoped<IOkxApiLogic, OkxApiLogic>();
+            service.AddScoped<IGetPotentialPositionsLogic, GetPotentialPositionsLogic>();
+            service.AddScoped<ICancelDemandLogic, CancelDemandLogic>();
+            service.AddScoped<IGetInProgressDemandsLogic, GetInProgressDemandsLogic>();
         }
     }
 }

@@ -20,20 +20,18 @@ namespace OkxPerpetualArbitrage.Application.Features.Joined.Queries
     /// </summary>
     public class GetPositionCloseDataQueryHandler : IRequestHandler<GetPositionCloseDataQuery, PositionDataDto>
     {
-        private readonly IPotentialPositionRepository _potentialPositionRepository;
-        private readonly ITotalAvailableCloseSizeCalculator _totalAvailableCloseSizeCalculator;
+        private readonly IPotentialPositionProcessorLogic _potentialPositionProcessorLogic;
+        private readonly ITotalAvailableCloseSizeCalculatorLogic _totalAvailableCloseSizeCalculator;
 
-        public GetPositionCloseDataQueryHandler(IPotentialPositionRepository potentialPositionRepository, ITotalAvailableCloseSizeCalculator totalAvailableCloseSizeCalculator)
+        public GetPositionCloseDataQueryHandler(IPotentialPositionProcessorLogic potentialPositionProcessorLogic, ITotalAvailableCloseSizeCalculatorLogic totalAvailableCloseSizeCalculator)
         {
-            _potentialPositionRepository = potentialPositionRepository;
+            _potentialPositionProcessorLogic = potentialPositionProcessorLogic;
             _totalAvailableCloseSizeCalculator = totalAvailableCloseSizeCalculator;
         }
         public async Task<PositionDataDto> Handle(GetPositionCloseDataQuery request, CancellationToken cancellationToken)
         {
             var maxSize = await _totalAvailableCloseSizeCalculator.GetTotalAvailableSize(request.Symbol);
-            var pp = await _potentialPositionRepository.GetPotentialPosition(request.Symbol);
-            if (pp == null)
-                throw new OkxPerpetualArbitrageCustomException("PotentnialPosition was not found"); 
+            var pp = await _potentialPositionProcessorLogic.GetPotentialPosition(request.Symbol);
             var dto = new PositionDataDto() { Symbol = request.Symbol, MaxSize = maxSize, Spread = pp.CloseSpread };
             return dto;
         }

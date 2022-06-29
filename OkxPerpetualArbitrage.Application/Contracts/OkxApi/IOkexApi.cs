@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OkxPerpetualArbitrage.Application.Contracts.ApiService
+namespace OkxPerpetualArbitrage.Application.Contracts.OkxApi
 {
     public interface IOkexApi
     {

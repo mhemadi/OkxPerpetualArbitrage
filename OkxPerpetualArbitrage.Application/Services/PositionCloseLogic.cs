@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
@@ -23,7 +23,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IOrderFillCreateLogic _orderFillCreateLogic;
         private readonly GeneralSetting _setting;
         private readonly ILogger<PositionCloseLogic> _logger;
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly IFundingIncomeRepository _fundingIncomeRepository;
         private readonly IPositionHistoryRepository _positionHistoryRepository;
         private readonly IPositionChunkCreateLogic _positionChunkCreateLogic;
@@ -32,7 +32,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IPositionCheckLogic _positionCheckLogic;
 
         public PositionCloseLogic(IPositionDemandRepository positionDemandRepository, IOrderFillCreateLogic orderFillCreateLogic, IOptions<GeneralSetting> setting
-            , ILogger<PositionCloseLogic> logger, IApiService apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
+            , ILogger<PositionCloseLogic> logger, IOkxApiWrapper apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
             , IPositionChunkCreateLogic positionChunkCreateLogic, IOrderFillRepository orderFillRepository, IPotentialPositionRepository potentialPositionRepository
             , IPositionCheckLogic positionCheckLogic)
         {
@@ -63,11 +63,19 @@ namespace OkxPerpetualArbitrage.Application.Services
                 while (lotSize != 0 && !demand.IsCanceled && tries < _setting.MaxCloseTries)
                 {
                     decimal filled;
+                    _logger.LogInformation("startining try {tries} to close chunksize {lotSizeChunk} for demand {positionDemandId}", tries, lotSizeChunk, positionDemandId);
                     if (isInstant)
                         filled = await ClosePositionInstant(symbol, lotSize, positionDemandId, potentialPosition);
                     else
                         filled = await _positionChunkCreateLogic.OpenClosePositionChunck(symbol, lotSizeChunk, positionDemandId, minSpread, potentialPosition, _setting.TryToBeMaker, false);
-                    tries++;
+
+                    {
+                       
+                       
+                        _logger.LogInformation("filled {filled} for demand {reqId}", filled, positionDemandId);
+
+
+                        tries++;
                     lotSize -= filled;
                     if (lotSizeChunk > lotSize)
                         lotSizeChunk = lotSize;

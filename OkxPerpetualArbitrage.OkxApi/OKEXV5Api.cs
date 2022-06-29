@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Helpers;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
@@ -358,7 +358,7 @@ namespace OkxPerpetualArbitrage.OkxApi
       }
       private async Task<OKEXResponse<List<OKEXBill>>> GetBill(int type)
       {
-            var url = $"/api/v5/account/balance";
+            var url = $"/api/v5/account/bills?type={type}";
             var apiResponse = await CallApi(url, HttpMethod.Get);
             var result = new OKEXResponse<List<OKEXBill>>(){Code = apiResponse.Code,Data = null,Message = apiResponse.Message};
             if (apiResponse.Code != 0)

@@ -1,4 +1,4 @@
-﻿using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+﻿using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,6 @@ namespace OkxPerpetualArbitrage.Application.Contracts.BackgroundService
 {
     public interface IPotentialPositionUpdater : IBackgroundServiceTask
     {
-        Task SavePotentialPositions(IApiService _apiService, IPotentialPositionRepository _potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository);
+        Task SavePotentialPositions(IOkxApiWrapper _apiService, IPotentialPositionRepository _potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository);
     }
 }

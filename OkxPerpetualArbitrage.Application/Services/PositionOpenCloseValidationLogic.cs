@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Helpers;
@@ -19,13 +19,13 @@ namespace OkxPerpetualArbitrage.Application.Services
 
 
         private readonly ILogger<PositionOpenCloseValidationLogic> _logger;
-        private readonly ITotalAvailableCloseSizeCalculator _totalAvailableCloseSizeCalculator;
+        private readonly ITotalAvailableCloseSizeCalculatorLogic _totalAvailableCloseSizeCalculator;
         private readonly IPositionDemandRepository _positionDemandRepository;
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly IInProgressDemandLogic _inProgressDemandLogic;
 
-        public PositionOpenCloseValidationLogic(ILogger<PositionOpenCloseValidationLogic> logger, ITotalAvailableCloseSizeCalculator totalAvailableCloseSizeCalculator
-            , IPositionDemandRepository positionDemandRepository, IApiService apiService, IInProgressDemandLogic inProgressDemandLogic)
+        public PositionOpenCloseValidationLogic(ILogger<PositionOpenCloseValidationLogic> logger, ITotalAvailableCloseSizeCalculatorLogic totalAvailableCloseSizeCalculator
+            , IPositionDemandRepository positionDemandRepository, IOkxApiWrapper apiService, IInProgressDemandLogic inProgressDemandLogic)
         {
             _logger = logger;
             _totalAvailableCloseSizeCalculator = totalAvailableCloseSizeCalculator;

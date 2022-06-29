@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Exceptions;
@@ -28,7 +28,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IOpenPositionProcessingChannel _openPositionProcessingChannel;
 
         public PositionOpenCloseChannelWriterLogic(IClosePositionProcessingChannel closePositionProcessingChannel, ILogger<PositionOpenCloseChannelWriterLogic> logger, IPositionChunckSizeCalculator orderChunckSizeCalculator
-            , IPotentialPositionRepository potentialPositionRepository, IPositionDemandRepository positionDemandRepository, IApiService apiService, IOrderFillRepository orderFillRepository, ITotalAvailableCloseSizeCalculator totalAvailableCloseSizeCalculator, IPositionOpenCloseValidationLogic positionOpenCloseValidationLogic
+            , IPotentialPositionRepository potentialPositionRepository, IPositionDemandRepository positionDemandRepository, IOkxApiWrapper apiService, IOrderFillRepository orderFillRepository, ITotalAvailableCloseSizeCalculatorLogic totalAvailableCloseSizeCalculator, IPositionOpenCloseValidationLogic positionOpenCloseValidationLogic
             , IOpenPositionProcessingChannel openPositionProcessingChannel)
         {
             _closePositionProcessingChannel = closePositionProcessingChannel;

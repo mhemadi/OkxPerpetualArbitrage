@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Exceptions;
 using OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries;
@@ -18,22 +19,22 @@ namespace OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries
     /// </summary>
     public class GetPositionDemandStatusQueryHandler : IRequestHandler<GetPositionDemandStatusQuery, PositionDemandStatusDto>
     {
-        private readonly IPositionDemandRepository _positionDemandRepository;
+        private readonly IGetInProgressDemandsLogic _getInProgressDemandsLogic;
         private readonly IMapper _mapper;
 
-        public GetPositionDemandStatusQueryHandler(IPositionDemandRepository positionDemandRepository, IMapper mapper)
+        public GetPositionDemandStatusQueryHandler(IGetInProgressDemandsLogic getInProgressDemandsLogic, IMapper mapper)
         {
-            _positionDemandRepository = positionDemandRepository;
+            _getInProgressDemandsLogic = getInProgressDemandsLogic;
             _mapper = mapper;
         }
 
         public async Task<PositionDemandStatusDto> Handle(GetPositionDemandStatusQuery request, CancellationToken cancellationToken)
         {
-            var r = await _positionDemandRepository.GetInProgressDemandsBySymbol(request.Symbol);
-            if (r == null || r.Count != 1) //dont throw
+
+            var demand = await _getInProgressDemandsLogic.GetInProggressDemand(request.Symbol);
+            if (demand == null) 
                 throw new OkxPerpetualArbitrageCustomException("Can not find the one demand corresponding to the symbol");
-            var req = r[0];
-            var dto = _mapper.Map<PositionDemandStatusDto>(req);
+            var dto = _mapper.Map<PositionDemandStatusDto>(demand);
             return dto;
         }
     }

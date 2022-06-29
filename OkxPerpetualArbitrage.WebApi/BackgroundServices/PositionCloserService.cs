@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.WebApi.BackgroundServices
 {
+    /// <summary>
+    /// This service processes close requests in the ClosePositionProcessingChannel and closes the symbols requested
+    /// </summary>
     public class PositionCloserService : BackgroundService
     {
         private readonly IPositionCloser _positionCloser;

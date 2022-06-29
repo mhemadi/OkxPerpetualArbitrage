@@ -1,4 +1,4 @@
-﻿using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+﻿using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using System;
 using System.Collections.Generic;

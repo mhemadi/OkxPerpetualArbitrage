@@ -10,8 +10,6 @@ namespace OkxPerpetualArbitrage.Application.Contracts.Logic
 {
     public interface IPositionCheckLogic
     {
-        IOrderFillRepository OrderFillRepository { get; }
-
         Task Checkposition(string symbol, PotentialPosition pp);
     }
 }

@@ -23,13 +23,12 @@ builder.Services.ApplicationServicesRegistration(builder.Configuration);
 builder.Services.PersistanceServicesRegistration(builder.Configuration);
 builder.Services.ApiServicesRegistration(builder.Configuration);
 
-//builder.Services.AddHostedService<PotentialPositionUpdaterService>();
-if (false)
-{
-    builder.Services.AddHostedService<FundsUpdaterService>();
-    builder.Services.AddHostedService<PotentialPositionUpdaterService>();
-    builder.Services.AddHostedService<CleanerService>();
-}
+
+//Enable background workers
+ builder.Services.AddHostedService<FundsUpdaterService>();
+// builder.Services.AddHostedService<PotentialPositionUpdaterService>();
+// builder.Services.AddHostedService<CleanerService>();
+
 
 builder.Services.AddHostedService<PositionOpenerService>();
 builder.Services.AddHostedService<PositionCloserService>();
@@ -43,8 +42,7 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 var app = builder.Build();
 
 
-//var logger = app.Services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<ExceptionMiddlewareExtensions>>();
-app.ConfigureExceptionHandler(Log.Logger as Microsoft.Extensions.Logging.ILogger);
+app.ConfigureExceptionHandler();
 
 
 // Configure the HTTP request pipeline.

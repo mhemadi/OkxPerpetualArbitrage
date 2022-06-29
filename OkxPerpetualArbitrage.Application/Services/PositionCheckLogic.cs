@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Domain.Entities;
@@ -16,12 +16,12 @@ namespace OkxPerpetualArbitrage.Application.Services
 
     public class PositionCheckLogic : IPositionCheckLogic
     {
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly IPositionDemandRepository _positionDemandRepository;
         private readonly IOrderFillRepository _orderFillRepository;
         private readonly ILogger<PositionCheckLogic> _logger;
 
-        public PositionCheckLogic(IApiService apiService, IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository
+        public PositionCheckLogic(IOkxApiWrapper apiService, IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository
             , ILogger<PositionCheckLogic> logger)
         {
             _apiService = apiService;
@@ -29,8 +29,6 @@ namespace OkxPerpetualArbitrage.Application.Services
             _orderFillRepository = orderFillRepository;
             _logger = logger;
         }
-
-        public IOrderFillRepository OrderFillRepository => _orderFillRepository;
 
         public async Task Checkposition(string symbol, PotentialPosition pp)
         {
@@ -42,7 +40,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             var fills = new List<OrderFill>();
             foreach (var d in openDemands)
             {
-                fills.AddRange(await OrderFillRepository.GetOrderFillsByPositionDemandId(d.PositionDemandId));
+                fills.AddRange(await _orderFillRepository.GetOrderFillsByPositionDemandId(d.PositionDemandId));
             }
 
             var spotSize = fills.Where(x => x.PartInPosition == PartInPosition.SpotBuy).Sum(x => x.Filled) + fills.Where(x => x.PartInPosition == PartInPosition.SpotBuy).Sum(x => x.Fee);

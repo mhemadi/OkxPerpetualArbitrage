@@ -14,7 +14,6 @@ namespace OkxPerpetualArbitrage.Application.Validators.DTOs
         {
             RuleFor(x=>x.Size).NotEmpty().GreaterThan(0);
             RuleFor(x => x.Symbol).NotEmpty();
-            RuleFor(x=>x.IsInstant).NotEmpty();
         }
     }
 }

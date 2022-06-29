@@ -1,7 +1,7 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Helpers;
@@ -19,7 +19,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
     public class FundsUpdater :  IFundsUpdater
     {
         private readonly ILogger<FundsUpdater> _logger;
-        private IApiService _apiService;
+        private IOkxApiWrapper _apiService;
         private readonly IServiceProvider _serviceProvider;
         private IFundingIncomeRepository _fundingIncomeRepository;
 
@@ -37,7 +37,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
-                        _apiService = scope.ServiceProvider.GetRequiredService<IApiService>();
+                        _apiService = scope.ServiceProvider.GetRequiredService<IOkxApiWrapper>();
                         _fundingIncomeRepository = scope.ServiceProvider.GetRequiredService<IFundingIncomeRepository>();
                         await SaveFundingBills(_apiService, _fundingIncomeRepository);
                     }
@@ -53,7 +53,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
         }
       
 
-        public async Task SaveFundingBills(IApiService _apiService, IFundingIncomeRepository _fundingRep)
+        public async Task SaveFundingBills(IOkxApiWrapper _apiService, IFundingIncomeRepository _fundingRep)
         {
             var bills = await _apiService.GetRecentFundingBills();
             List<FundingIncome> incomes = new List<FundingIncome>();

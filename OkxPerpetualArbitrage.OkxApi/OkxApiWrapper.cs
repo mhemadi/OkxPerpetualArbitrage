@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
@@ -14,7 +14,7 @@ namespace OkxPerpetualArbitrage.OkxApi
 {
 
 
-    public class ApiService : IApiService
+    public class OkxApiWrapper : IOkxApiWrapper
     {
         private readonly OkexApiSetting setting;
         private IOkexApi api;
@@ -22,7 +22,7 @@ namespace OkxPerpetualArbitrage.OkxApi
         private int maxTries = 7;
         private int wait = 100;
         //   private readonly IConfiguration _configuration;
-        public ApiService(IOptions<OkexApiSetting> setting, IOkexApi api, ILogger<ApiService> logger)
+        public OkxApiWrapper(IOptions<OkexApiSetting> setting, IOkexApi api, ILogger<OkxApiWrapper> logger)
         {
             this.setting = setting.Value;
             this.api = api;
@@ -67,6 +67,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting funding bills");
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             return bills;
@@ -99,6 +100,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting funding bills");
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             int c = days * 3;
@@ -431,7 +433,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting all instruments data");
-                    await Task.Delay(wait);
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             List<OKEXMarketInfo> symbols = new List<OKEXMarketInfo>();
@@ -480,7 +482,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting " + symbol + " balance");
-                    await Task.Delay(wait);
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             return ob;
@@ -512,7 +514,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting " + symbol + " PositionSize");
-                    await Task.Delay(wait);
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             return size;
@@ -544,7 +546,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed getting maintenance time");
-                    await Task.Delay(wait);
+                    await Task.Delay(waitMiliSeconds);
                 }
             }
             if (times == null)

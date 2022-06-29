@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 
 namespace OkxPerpetualArbitrage.OkxApi
@@ -14,7 +14,7 @@ namespace OkxPerpetualArbitrage.OkxApi
         {
             service.Configure<OkexApiSetting>(configuration.GetSection("OkexApiSetting"));
             service.AddScoped<IOkexApi, OKEXV5Api>();
-            service.AddTransient<IApiService, ApiService>();
+            service.AddTransient<IOkxApiWrapper, OkxApiWrapper>();
 
         }
     }

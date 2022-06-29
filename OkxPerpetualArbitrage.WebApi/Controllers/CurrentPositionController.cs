@@ -22,7 +22,7 @@ namespace OkxPerpetualArbitrage.WebApi.Controllers
             var dto = await _mediator.Send(new GetCurrentPositionsQuery() { CheckError = false });
             return Ok(dto);
         }
-        [Route("api/currentpositionCheckerror")]
+        [Route("api/currentpositioncheckerror")]
         [HttpGet]
         public async Task<IActionResult> GetCurrentPositionsCheckError()
         {
@@ -50,7 +50,7 @@ namespace OkxPerpetualArbitrage.WebApi.Controllers
         }
 
 
-        [Route("api/currentPosition/{symbol}/reset")]
+        [Route("api/currentposition/{symbol}/reset")]
         [HttpPost]
         public async Task<IActionResult> ResetPosition(string symbol)
         {

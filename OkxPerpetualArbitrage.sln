@@ -15,15 +15,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.WebAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.Application", "OkxPerpetualArbitrage.Application\OkxPerpetualArbitrage.Application.csproj", "{0E66F767-50CA-4C59-AFE9-2029420D5DA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.Domain", "OkxPerpetualArbitrage.Domain\OkxPerpetualArbitrage.Domain.csproj", "{B76AD755-9F03-4E42-A058-739AB3AC3A60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.Domain", "OkxPerpetualArbitrage.Domain\OkxPerpetualArbitrage.Domain.csproj", "{B76AD755-9F03-4E42-A058-739AB3AC3A60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.Persistance", "OkxPerpetualArbitrage.Persistance\OkxPerpetualArbitrage.Persistance.csproj", "{63834E8C-2746-4B37-825F-CEB15692C771}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.Persistance", "OkxPerpetualArbitrage.Persistance\OkxPerpetualArbitrage.Persistance.csproj", "{63834E8C-2746-4B37-825F-CEB15692C771}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.OkxApi", "OkxPerpetualArbitrage.OkxApi\OkxPerpetualArbitrage.OkxApi.csproj", "{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.OkxApi", "OkxPerpetualArbitrage.OkxApi\OkxPerpetualArbitrage.OkxApi.csproj", "{EC760BA2-967B-48CE-9AE1-1599EA4C69E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example UI", "Example UI", "{78B3D142-4020-46AD-BB22-C024A4909D82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.BlazorUIExample", "OkxPerpetualArbitrage.BlazorUIExample\OkxPerpetualArbitrage.BlazorUIExample.csproj", "{E628F09E-E8D3-41B0-85A8-EAC4EE047084}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OkxPerpetualArbitrage.BlazorUIExample", "OkxPerpetualArbitrage.BlazorUIExample\OkxPerpetualArbitrage.BlazorUIExample.csproj", "{E628F09E-E8D3-41B0-85A8-EAC4EE047084}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C0F1ECE5-F479-41AC-AEE9-24DFD18C14E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OkxPerpetualArbitrage.Application.Test", "OkxPerpetualArbitrage.Application.Test\OkxPerpetualArbitrage.Application.Test.csproj", "{DADF3FD1-F751-477D-891E-8E091355B828}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,10 @@ Global
 		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E628F09E-E8D3-41B0-85A8-EAC4EE047084}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DADF3FD1-F751-477D-891E-8E091355B828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DADF3FD1-F751-477D-891E-8E091355B828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DADF3FD1-F751-477D-891E-8E091355B828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DADF3FD1-F751-477D-891E-8E091355B828}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,6 +78,7 @@ Global
 		{EC760BA2-967B-48CE-9AE1-1599EA4C69E4} = {6C1D328A-995B-415E-A1D7-4FD2EDC9C792}
 		{78B3D142-4020-46AD-BB22-C024A4909D82} = {28D9ED7A-1951-4BCB-8592-B53AA3387495}
 		{E628F09E-E8D3-41B0-85A8-EAC4EE047084} = {78B3D142-4020-46AD-BB22-C024A4909D82}
+		{DADF3FD1-F751-477D-891E-8E091355B828} = {C0F1ECE5-F479-41AC-AEE9-24DFD18C14E1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {533C9339-EE7F-4C04-88EA-3EE5ACF47B6D}

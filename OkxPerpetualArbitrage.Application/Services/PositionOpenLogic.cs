@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
@@ -22,7 +22,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IOrderFillCreateLogic _orderFillCreateLogic;
         private readonly GeneralSetting _setting;
         private readonly ILogger<PositionOpenLogic> _logger;
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly IFundingIncomeRepository _fundingIncomeRepository;
         private readonly IPositionHistoryRepository _positionHistoryRepository;
         private readonly IPositionChunkCreateLogic _positionChunkCreateLogic;
@@ -31,7 +31,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IPositionCheckLogic _positionCheckLogic;
 
         public PositionOpenLogic(IPositionDemandRepository positionDemandRepository, IOrderFillCreateLogic orderFillCreateLogic, IOptions<GeneralSetting> setting
-            , ILogger<PositionOpenLogic> logger, IApiService apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
+            , ILogger<PositionOpenLogic> logger, IOkxApiWrapper apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
             , IPositionChunkCreateLogic positionChunkCreateLogic, IOrderFillRepository orderFillRepository, IPotentialPositionRepository potentialPositionRepository
             , IPositionCheckLogic positionCheckLogic)
         {

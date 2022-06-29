@@ -10,11 +10,11 @@ namespace OkxPerpetualArbitrage.Application.Services
 {
  
 
-    public class TotalAvailableCloseSizeCalculator : ITotalAvailableCloseSizeCalculator
+    public class TotalAvailableCloseSizeCalculatorLogic : ITotalAvailableCloseSizeCalculatorLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
         private readonly IOrderFillRepository _orderFillRepository;
-        public TotalAvailableCloseSizeCalculator(IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository)
+        public TotalAvailableCloseSizeCalculatorLogic(IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository)
         {
             _positionDemandRepository = positionDemandRepository;
             _orderFillRepository = orderFillRepository;

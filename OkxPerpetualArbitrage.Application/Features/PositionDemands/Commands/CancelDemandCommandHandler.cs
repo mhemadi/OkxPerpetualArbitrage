@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
@@ -15,23 +16,15 @@ namespace OkxPerpetualArbitrage.Application.Features.PositionDemands.Commands
     /// </summary>
     public class CancelDemandCommandHandler : IRequestHandler<CancelDemandCommand, ApiCommandResponseDto>
     {
-        private readonly IPositionDemandRepository _positionDemandRepository;
+        private readonly ICancelDemandLogic _cancelDemandLogic;
 
-        public CancelDemandCommandHandler(IPositionDemandRepository positionDemandRepository)
+        public CancelDemandCommandHandler(ICancelDemandLogic cancelDemandLogic)
         {
-            _positionDemandRepository = positionDemandRepository;
+            _cancelDemandLogic = cancelDemandLogic;
         }
         public async Task<ApiCommandResponseDto> Handle(CancelDemandCommand request, CancellationToken cancellationToken)
         {
-            var demand = await  _positionDemandRepository.GetByIdAsync(request.DemandId);
-            if (demand == null)
-                return new ApiCommandResponseDto() { Success = false, Message = "Can not find the request" };
-            if (demand.PositionDemandState != PositionDemandState.InProgress)
-                return new ApiCommandResponseDto() { Success = false, Message = "Request is already done and can not be canceled" };
-            if (demand.IsCanceled)
-                return new ApiCommandResponseDto() { Success = false, Message = "Request is already canceled and can not be canceled again" };
-              await  _positionDemandRepository.SetIsCanceled(demand.PositionDemandId, true);
-            return new ApiCommandResponseDto() { Success = true, Message = "Cancel request has been submitted successfuly" };
+            return await _cancelDemandLogic.Cancel(request.DemandId, cancellationToken);
         }
     }
 }

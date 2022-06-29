@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.ApiService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
@@ -22,7 +22,7 @@ namespace OkxPerpetualArbitrage.Application.Services
     {
         private readonly ILogger<PositionChunkCreateLogic> _logger;
         private readonly IPositionDemandRepository _positionDemandRepository;
-        private readonly IApiService _apiService;
+        private readonly IOkxApiWrapper _apiService;
         private readonly IOrderCreateLogic _orderCreateLogic;
         private readonly IOrderStateCheckLogic _orderStateCheckLogic;
         private readonly IOrderFillCreateLogic _orderFillCreateLogic;
@@ -30,7 +30,7 @@ namespace OkxPerpetualArbitrage.Application.Services
 
 
         public PositionChunkCreateLogic(ILogger<PositionChunkCreateLogic> logger, IPositionDemandRepository positionDemandRepository,
-          IApiService apiService, IOptions<GeneralSetting> setting, IOrderCreateLogic orderCreateLogic, IOrderStateCheckLogic orderStateCheckLogic,
+          IOkxApiWrapper apiService, IOptions<GeneralSetting> setting, IOrderCreateLogic orderCreateLogic, IOrderStateCheckLogic orderStateCheckLogic,
           IOrderFillCreateLogic orderFillCreateLogic)
         {
             _logger = logger;
@@ -44,6 +44,7 @@ namespace OkxPerpetualArbitrage.Application.Services
 
         public async Task<decimal> OpenClosePositionChunck(string symbol, decimal lotSizeChunk, int positionDemandId, decimal minSpread, PotentialPosition potentialPosition, bool tryToBeMaker, bool open)
         {
+
             int maxTries = _setting.MaxCloseTries;
             if (open)
                 maxTries = _setting.MaxOpenTries;
@@ -69,6 +70,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             decimal spotSize;
             while (filledLotPerp < lotSizeChunk)
             {
+                
                 tries++;
                 demand = await _positionDemandRepository.GetPositionDemandNoTracking(positionDemandId);
                 if (perpOrderId == "-1")

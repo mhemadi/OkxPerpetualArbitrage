@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using System;
 using System.Collections.Generic;
@@ -14,15 +15,15 @@ namespace OkxPerpetualArbitrage.Application.Features.PotentialPositions.Commands
     /// </summary>
     public class GetSymolsQueryHandler : IRequestHandler<GetSymolsQuery, List<string>>
     {
-        private readonly IPotentialPositionRepository _potentialPositionRepository;
+        private readonly IPotentialPositionProcessorLogic _potentialPositionProcessorLogic;
 
-        public GetSymolsQueryHandler(IPotentialPositionRepository potentialPositionRepository)
+        public GetSymolsQueryHandler(IPotentialPositionProcessorLogic potentialPositionProcessorLogic)
         {
-            _potentialPositionRepository = potentialPositionRepository;
+            _potentialPositionProcessorLogic = potentialPositionProcessorLogic;
         }
         public async Task<List<string>> Handle(GetSymolsQuery request, CancellationToken cancellationToken)
         {
-           var all =  await _potentialPositionRepository.GetAllAsync();
+            var all = await _potentialPositionProcessorLogic.GetAllPotentialPositions();
             return all.OrderBy(x=>x.Symbol).Select(x => x.Symbol).ToList();
         }
     }
