@@ -1,29 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class PositionCloseLogic : IPositionCloseLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
         private readonly IOrderFillCreateLogic _orderFillCreateLogic;
         private readonly GeneralSetting _setting;
         private readonly ILogger<PositionCloseLogic> _logger;
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly IFundingIncomeRepository _fundingIncomeRepository;
         private readonly IPositionHistoryRepository _positionHistoryRepository;
         private readonly IPositionChunkCreateLogic _positionChunkCreateLogic;
@@ -32,7 +25,7 @@ namespace OkxPerpetualArbitrage.Application.Services
         private readonly IPositionCheckLogic _positionCheckLogic;
 
         public PositionCloseLogic(IPositionDemandRepository positionDemandRepository, IOrderFillCreateLogic orderFillCreateLogic, IOptions<GeneralSetting> setting
-            , ILogger<PositionCloseLogic> logger, IOkxApiWrapper apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
+            , ILogger<PositionCloseLogic> logger, IOkxApiWrapper apiWrapper, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
             , IPositionChunkCreateLogic positionChunkCreateLogic, IOrderFillRepository orderFillRepository, IPotentialPositionRepository potentialPositionRepository
             , IPositionCheckLogic positionCheckLogic)
         {
@@ -40,7 +33,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             _orderFillCreateLogic = orderFillCreateLogic;
             _setting = setting.Value;
             _logger = logger;
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _fundingIncomeRepository = fundingIncomeRepository;
             _positionHistoryRepository = positionHistoryRepository;
             _positionChunkCreateLogic = positionChunkCreateLogic;
@@ -69,13 +62,8 @@ namespace OkxPerpetualArbitrage.Application.Services
                     else
                         filled = await _positionChunkCreateLogic.OpenClosePositionChunck(symbol, lotSizeChunk, positionDemandId, minSpread, potentialPosition, _setting.TryToBeMaker, false);
 
-                    {
-                       
-                       
-                        _logger.LogInformation("filled {filled} for demand {reqId}", filled, positionDemandId);
-
-
-                        tries++;
+                    _logger.LogInformation("filled {filled} for demand {reqId}", filled, positionDemandId);
+                    tries++;
                     lotSize -= filled;
                     if (lotSizeChunk > lotSize)
                         lotSizeChunk = lotSize;
@@ -97,15 +85,11 @@ namespace OkxPerpetualArbitrage.Application.Services
                 if (demandTracked.Filled == 0)
                     demandTracked.PositionDemandState = PositionDemandState.Done;
 
-
-
-
                 var pp = await _potentialPositionRepository.GetPotentialPosition(symbol);
                 var fills = await _orderFillRepository.GetOrderFillsByPositionDemandId(positionDemandId);
                 decimal spotSize = fills.Where(x => x.PartInPosition == PartInPosition.SpotSell).Sum(x => x.Filled);
                 decimal size = fills.Where(x => x.PartInPosition == PartInPosition.PerpCloseSell).Sum(x => x.Filled);
                 size *= pp.ContractValuePerp;
-                //Update the actual spread if its useful
                 if (demandTracked.Filled != 0)
                 {
                     decimal sellPriceSpot = 0;
@@ -120,20 +104,14 @@ namespace OkxPerpetualArbitrage.Application.Services
                         sellPriceSpot /= spotSize;
                         buyPricePerp /= size;
                         var spread = (sellPriceSpot - buyPricePerp) / ((buyPricePerp + sellPriceSpot) / 2) * 100;
-
                         demandTracked.ActualSpread = spread;
                     }
                     else
                         _logger.LogError("Demand {demandId} has filled at {filled} but spot size {spotSize} and perp size {perpsize}", positionDemandId, demandTracked.Filled, spotSize, size);
                 }
 
-
-
                 await UpdateRequestAfterClose(demandTracked, pp);
-
                 demand = await _positionDemandRepository.GetPositionDemandNoTracking(positionDemandId);
-
-
 
                 decimal spotSizeAvailable = fills.Where(x => x.PartInPosition == PartInPosition.SpotSell).Sum(x => x.Filled) + fills.Where(x => x.PartInPosition == PartInPosition.SpotBuy).Sum(x => x.Fee);
                 decimal sizeClose = fills.Where(x => x.PartInPosition == PartInPosition.PerpCloseSell).Sum(x => x.Filled);
@@ -151,10 +129,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                 }
 
                 await _positionCheckLogic.Checkposition(symbol, pp);
-
-
-
-
             }
         }
 
@@ -168,23 +142,25 @@ namespace OkxPerpetualArbitrage.Application.Services
                 _logger.LogError("Could not find the demand to close the position instantly {symbol} {positionDemandId} ", symbol, positionDemandId);
                 throw new Exception("Could not find the demand to close the position instantly");
             }
-            string perpInstrumnet = _apiService.GetPerpInstrument(symbol);
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var perpOrderId = await _apiService.PlaceOrder(perpInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.buy, OKEXPostitionSide.SHORT, lotSize, 0, true, 10, 100);
+            string perpInstrumnet = _apiWrapper.GetPerpInstrument(symbol);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            _apiWrapper.SetWait(500);
+            _apiWrapper.SetMaxTry(10);
+            var perpOrderId = await _apiWrapper.PlaceOrder(perpInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.buy, OKEXPostitionSide.SHORT, lotSize, 0, true);
             if (perpOrderId == "-1")
             {
                 _logger.LogError("Failed to place first close position order for {symbol} and {lotSize}", symbol, lotSize);
                 return 0;
             }
 
-            var spotOrderId = await _apiService.PlaceOrder(spotInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.sell, OKEXPostitionSide.NotPosition, lotSize * potentialPosition.ContractValuePerp, 0, true, 500, 500);
+            var spotOrderId = await _apiWrapper.PlaceOrder(spotInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.sell, OKEXPostitionSide.NotPosition, lotSize * potentialPosition.ContractValuePerp, 0, true);
             if (spotOrderId == "-1")
             {
                 _logger.LogCritical("Failed to place second close position order for {symbol} and {lotSize}", symbol, lotSize);
                 return 0;
             }
             await Task.Delay(100);
-            var perpOrder = await _apiService.GetOrder(perpInstrumnet, perpOrderId, 10, 1000);
+            var perpOrder = await _apiWrapper.GetOrder(perpInstrumnet, perpOrderId);
             if (perpOrder == null)
             {
                 _logger.LogCritical("Failed to retreive first close position order for {symbol} and {lotSize}", symbol, lotSize);
@@ -192,7 +168,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             }
             await _orderFillCreateLogic.AddOrderFill(perpOrder, demand.PositionDemandId, PartInPosition.PerpCloseSell, potentialPosition);
             fillLotSize = perpOrder.Size;
-            var spotpOrder = await _apiService.GetOrder(spotInstrumnet, spotOrderId, 10, 1000);
+            var spotpOrder = await _apiWrapper.GetOrder(spotInstrumnet, spotOrderId);
             if (spotpOrder == null)
             {
                 _logger.LogCritical("Failed to retreive second close position order for {symbol} and {lotSize}", symbol, lotSize);
@@ -254,7 +230,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                         totalSellSpot += (fill.Filled);
                         totalFeeUsdt += fill.Fee;
                     }
-
                 }
             }
             if (totalSellPerp - totalBuyPerp != 0)
@@ -290,14 +265,10 @@ namespace OkxPerpetualArbitrage.Application.Services
                 TotalPNL = totalPnl
             };
 
-
             _logger.LogInformation("spotTradePnl {spotTradePnl}, perpTradePnl {perpTradePnl}, tradePnl {tradePnl}, totalFeeUsdt {totalFeeUsdt}, totalFunding {totalFunding}, totalPnl {totalPnl}", spotTradePnl, perpTradePnl, tradePnl, totalFeeUsdt, totalFunding, totalPnl);
             await _positionHistoryRepository.AddAsync(positionHistory);
             await _fundingIncomeRepository.EndCurrentPositionStatus(currentDemand.Symbol);
             return;
-
         }
-
     }
-
 }

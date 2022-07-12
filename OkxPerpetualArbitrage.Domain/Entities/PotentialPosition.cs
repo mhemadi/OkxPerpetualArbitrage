@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OkxPerpetualArbitrage.Domain.Entities
+﻿namespace OkxPerpetualArbitrage.Domain.Entities
 {
     public class PotentialPosition
     {

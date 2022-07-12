@@ -1,47 +1,31 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-  
-
     public class PositionOpenLogic : IPositionOpenLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
-        private readonly IOrderFillCreateLogic _orderFillCreateLogic;
         private readonly GeneralSetting _setting;
         private readonly ILogger<PositionOpenLogic> _logger;
-        private readonly IOkxApiWrapper _apiService;
-        private readonly IFundingIncomeRepository _fundingIncomeRepository;
-        private readonly IPositionHistoryRepository _positionHistoryRepository;
         private readonly IPositionChunkCreateLogic _positionChunkCreateLogic;
         private readonly IOrderFillRepository _orderFillRepository;
         private readonly IPotentialPositionRepository _potentialPositionRepository;
         private readonly IPositionCheckLogic _positionCheckLogic;
 
-        public PositionOpenLogic(IPositionDemandRepository positionDemandRepository, IOrderFillCreateLogic orderFillCreateLogic, IOptions<GeneralSetting> setting
-            , ILogger<PositionOpenLogic> logger, IOkxApiWrapper apiService, IFundingIncomeRepository fundingIncomeRepository, IPositionHistoryRepository positionHistoryRepository
+        public PositionOpenLogic(IPositionDemandRepository positionDemandRepository, IOptions<GeneralSetting> setting
+            , ILogger<PositionOpenLogic> logger
             , IPositionChunkCreateLogic positionChunkCreateLogic, IOrderFillRepository orderFillRepository, IPotentialPositionRepository potentialPositionRepository
             , IPositionCheckLogic positionCheckLogic)
         {
             _positionDemandRepository = positionDemandRepository;
-            _orderFillCreateLogic = orderFillCreateLogic;
             _setting = setting.Value;
             _logger = logger;
-            _apiService = apiService;
-            _fundingIncomeRepository = fundingIncomeRepository;
-            _positionHistoryRepository = positionHistoryRepository;
             _positionChunkCreateLogic = positionChunkCreateLogic;
             _orderFillRepository = orderFillRepository;
             _potentialPositionRepository = potentialPositionRepository;
@@ -94,7 +78,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                 decimal spotSize = fills.Where(x => x.PartInPosition == PartInPosition.SpotBuy).Sum(x => x.Filled) + fills.Where(x => x.PartInPosition == PartInPosition.SpotBuy).Sum(x => x.Fee);
                 decimal size = fills.Where(x => x.PartInPosition == PartInPosition.PerpOpenSell).Sum(x => x.Filled);
                 size *= pp.ContractValuePerp;
-                //Update the actual spread if its useful
                 if (demandTracked.Filled != 0)
                 {
                     decimal buyPriceSpot = 0;
@@ -110,7 +93,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                         buyPriceSpot /= spotSize;
                         sellPricePerp /= size;
                         var spread = (sellPricePerp - buyPriceSpot) / ((sellPricePerp + buyPriceSpot) / 2) * 100;
-
                         demandTracked.ActualSpread = spread;
                     }
                     else
@@ -118,18 +100,7 @@ namespace OkxPerpetualArbitrage.Application.Services
                 }
                 demandTracked.UpdateDate = DateTime.UtcNow;
                 await _positionDemandRepository.UpdateAsync(demandTracked);
-
-
                 demand = await _positionDemandRepository.GetPositionDemandNoTracking(positionDemandId);
-
-
-
-
-
-
-
-
-
                 if (size != demand.Filled)
                 {
                     _logger.LogCritical("sum of order fill size {sumSize} is not equal to demand fill size {filled}", size, demand.Filled);
@@ -140,12 +111,7 @@ namespace OkxPerpetualArbitrage.Application.Services
                 {
                     _logger.LogCritical("sum of order fill size {sumSize} is larger than spot size {spotSize}", size, spotSize);
                 }
-
-
-
                 await _positionCheckLogic.Checkposition(symbol, pp);
-
-
             }
         }
     }

@@ -1,16 +1,9 @@
 ﻿using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
-using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class InProgressDemandLogic : IInProgressDemandLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
@@ -25,7 +18,6 @@ namespace OkxPerpetualArbitrage.Application.Services
         {
             decimal sumFund = 0;
             var inProgressDemands = await _positionDemandRepository.GetInProgressDemands(PositionDemandSide.Open);
-
             foreach (var demand in inProgressDemands)
             {
                 var pp = await _potentialPositionRepository.GetPotentialPosition(demand.Symbol);

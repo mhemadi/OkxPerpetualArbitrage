@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Persistance.Repositories
 {
@@ -28,7 +23,7 @@ namespace OkxPerpetualArbitrage.Persistance.Repositories
             {
                 pp.IsUpToDate = false;
                 _dbContext.PotentialPositions.Update(pp);
-               await  _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
             }
         }
 

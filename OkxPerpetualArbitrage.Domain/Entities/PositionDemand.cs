@@ -1,7 +1,4 @@
 ﻿using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OkxPerpetualArbitrage.Domain.Entities
 {

@@ -9,6 +9,6 @@ namespace OkxPerpetualArbitrage.Application.Contracts.BackgroundService
 {
     public interface IFundsUpdater : IBackgroundServiceTask
     {
-        Task SaveFundingBills(IOkxApiWrapper _apiService, IFundingIncomeRepository _fundingRep);
+        Task SaveFundingBills(IOkxApiWrapper okxApiWrapper, IFundingIncomeRepository fundingIncomeRepository);
     }
 }

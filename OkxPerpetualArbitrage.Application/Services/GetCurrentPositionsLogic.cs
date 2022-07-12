@@ -1,40 +1,33 @@
-﻿using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
-using OkxPerpetualArbitrage.Application.Contracts.Logic;
+﻿using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class GetCurrentPositionsLogic : IGetCurrentPositionsLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
         private readonly IOrderFillRepository _orderFillRepository;
         private readonly IPotentialPositionRepository _potentialPositionRepository;
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly IFundingIncomeRepository _fundingIncomeRepository;
 
         public GetCurrentPositionsLogic(IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository, IPotentialPositionRepository potentialPositionRepository
-            , IOkxApiWrapper apiService, IFundingIncomeRepository fundingIncomeRepository)
+            , IOkxApiWrapper apiWrapper, IFundingIncomeRepository fundingIncomeRepository)
         {
             _positionDemandRepository = positionDemandRepository;
             _orderFillRepository = orderFillRepository;
             _potentialPositionRepository = potentialPositionRepository;
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _fundingIncomeRepository = fundingIncomeRepository;
         }
         public async Task<List<CurrentPositionListItemDto>> GetCurrentPositions(bool checkError, CancellationToken cancellationToken)
         {
             var r = new List<CurrentPositionListItemDto>();
-            var symbolInfo = await _apiService.GetAllSymbols();
+            var symbolInfo = await _apiWrapper.GetAllSymbols();
             var openDemands = await _positionDemandRepository.GetIncompleteDemands();
             Dictionary<string, List<OrderFill>> dic = new Dictionary<string, List<OrderFill>>();
             foreach (var demand in openDemands)
@@ -95,7 +88,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                     sellPricePerp /= size;
                 }
 
-
                 var closeFee = c.TotalFees;//This is just an estimation. Can make more accurate guess
                 var tmpPnl = (sellPriceSpot - buyPriceSpot) * size;
                 tmpPnl += (sellPricePerp - buyPricePerp) * size;
@@ -103,17 +95,14 @@ namespace OkxPerpetualArbitrage.Application.Services
                 c.EstimatedCloseCost = tmpPnl;
                 c.PNL = tmpPnl + c.TotalFees + c.TotalFundingIncome;
 
-
-
                 c.CloseInProgress = false;
                 if (inProgressDemands.Exists(x => x.Symbol == c.Symbol))
                     c.CloseInProgress = true;
-
                 c.Error = "";
                 if (checkError)
                 {
-                    var posSize = await _apiService.GetPositionSize(c.Symbol);
-                    var spotBalance = await _apiService.GetBalance(c.Symbol);
+                    var posSize = await _apiWrapper.GetPositionSize(c.Symbol);
+                    var spotBalance = await _apiWrapper.GetBalance(c.Symbol);
                     spotSize = spotBalance == null ? 0 : spotBalance.Cash;
                     if (posSize != c.PositionSize / pp.ContractValuePerp)
                         c.Error += "Size doesnt match the position size on okex. ";
@@ -124,8 +113,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                 }
                 r.Add(c);
             }
-
-
             return r;
         }
     }

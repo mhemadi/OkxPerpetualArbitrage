@@ -6,17 +6,11 @@ using OkxPerpetualArbitrage.Application.Helpers;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.OkxApi
 {
-
-
     public class OKEXV5Api : IOkexApi
     {
         private const string Url = "https://www.okex.com/";
@@ -60,9 +54,6 @@ namespace OkxPerpetualArbitrage.OkxApi
                 return 0;
             return Convert.ToDecimal(o);
         }
-
-
-
         public async Task<OKEXResponse<decimal>> GetInterestFreeAmount(string currency)
         {
             var url = $"/api/v5/public/discount-rate-interest-free-quota?ccy={currency}";
@@ -125,8 +116,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             }
             return result;
         }
-
-
         public async Task<OKEXResponse<decimal>> GetPositionSize(OKEXInstrumentType instrumentType, string instrument)
         {
             var url = $"/api/v5/account/positions?instType={instrumentType}&instId={instrument}";
@@ -148,60 +137,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             result.Data = Convert.ToDecimal(apiResponse.Data[0].pos);
             return result;
         }
-        /*
-        public async Task<OrderBookItem> GetPositionSimpledata(OKEXInstrumentType instrumentType, string instrument)
-        {
-            var resultString = $"/api/v5/account/positions?instType={instrumentType}&instId={instrument}";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return null;
-            int i = 0;
-            foreach (var v in o.data)
-                i++;
-            if (i == 0 || (o.data[0].pos == 0))
-            {
-                return new OrderBookItem() { Amount = 0, Price = -1 };
-            }
-            if (i != 1)
-                return null;
-            OrderBookItem obi = new OrderBookItem();
-            obi.Amount = o.data[0].pos;
-            obi.Price = o.data[0].avgPx;
-            return obi;
-        }
-
-        public async Task<decimal> GetPositionLiability(OKEXInstrumentType instrumentType, string instrument)
-        {
-            var resultString = $"/api/v5/account/positions?instType={instrumentType}&instId={instrument}";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return 1;
-            int i = 0;
-            foreach (var v in o.data)
-                i++;
-            if (i != 1)
-                return 1;
-            decimal l = o.data[0].liab;
-            return l;
-        }
-        public async Task<decimal> GetPositionLiquidationPrice(OKEXInstrumentType instrumentType, string instrument)
-        {
-            var resultString = $"/api/v5/account/positions?instType={instrumentType}&instId={instrument}";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return -1;
-            int i = 0;
-            foreach (var v in o.data)
-                i++;
-            if (i != 1)
-                return -1;
-            decimal l = o.data[0].liqPx;
-            return l;
-        }
-        */
         public async Task<OKEXResponse<Tuple<decimal, decimal>>> GetFeeForMakerAndTaker(OKEXInstrumentType instrumentType, string instrument)
         {
 
@@ -226,7 +161,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             result.Data = new Tuple<decimal, decimal>(Convert.ToDecimal(apiResponse.Data[0].maker), Convert.ToDecimal(apiResponse.Data[0].taker));
             return result;
         }
-
         public async Task<OKEXResponse<Tuple<decimal, decimal, DateTime>>> GetCurrentAndNextFundingRatesAndFundingTime(string instrument)
         {
             var url = $"/api/v5/public/funding-rate?instId={instrument}";
@@ -248,39 +182,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             result.Data = new Tuple<decimal, decimal, DateTime>(Convert.ToDecimal(apiResponse.Data[0].fundingRate), Convert.ToDecimal(apiResponse.Data[0].nextFundingRate), DateTimeHelper.GetDateFromUnix(Convert.ToInt64(apiResponse.Data[0].fundingTime)));
             return result;
         }
-        /*
-        public async Task<decimal> GetOptionExcercisePrice(string currency, string instrument)
-        {
-            var resultString = $"/api/v5/public/delivery-exercise-history?instType=OPTION&uly={currency}-USD";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return -1;
-            foreach (var v in o.data[0].details)
-            {
-                string inst = Convert.ToString(v.insId);
-                if (inst == instrument)
-                    return GetDecimal(v.px);
-            }
-            return -1;
-        }
-
-        public async Task<Tuple<decimal, decimal>> GetPerpContractValueAndTickSize(string instrument, OKEXInstrumentType instrumentType = OKEXInstrumentType.SWAP)
-        {
-            var resultString = $"/api/v5/public/instruments?instType={instrumentType}&instId={instrument}";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return new Tuple<decimal, decimal>(0, 0);
-            int i = 0;
-            foreach (var v in o.data)
-                i++;
-            if (i != 1)
-                return new Tuple<decimal, decimal>(0, 0);
-            return new Tuple<decimal, decimal>(Convert.ToDecimal(o.data[0].ctVal), Convert.ToDecimal(o.data[0].tickSz));
-
-        }
-        */
         public async Task<OKEXResponse<Tuple<decimal, decimal, decimal>>> GetPerpContractMinSizeAndTickSizeAndContractValue(string instrument)
         {
             var url = $"/api/v5/public/instruments?instType={OKEXInstrumentType.SWAP}&instId={instrument}";
@@ -324,7 +225,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             return result;
 
         }
-
         public async Task<OKEXResponse<decimal>> GetSpotMinSize(string instrument)
         {
             var url = $"/api/v5/public/instruments?instType=SPOT&instId={instrument}";
@@ -347,20 +247,19 @@ namespace OkxPerpetualArbitrage.OkxApi
             return result;
 
         }
-     
-      public async Task<OKEXResponse<List<OKEXBill>>> GetFundingBills()
-      {
-          return await GetBill(8);
-      }
-      public async Task<OKEXResponse<List<OKEXBill>>> GetDeliveryBills()
-      {
-          return await GetBill(3);
-      }
-      private async Task<OKEXResponse<List<OKEXBill>>> GetBill(int type)
-      {
+        public async Task<OKEXResponse<List<OKEXBill>>> GetFundingBills()
+        {
+            return await GetBill(8);
+        }
+        public async Task<OKEXResponse<List<OKEXBill>>> GetDeliveryBills()
+        {
+            return await GetBill(3);
+        }
+        private async Task<OKEXResponse<List<OKEXBill>>> GetBill(int type)
+        {
             var url = $"/api/v5/account/bills?type={type}";
             var apiResponse = await CallApi(url, HttpMethod.Get);
-            var result = new OKEXResponse<List<OKEXBill>>(){Code = apiResponse.Code,Data = null,Message = apiResponse.Message};
+            var result = new OKEXResponse<List<OKEXBill>>() { Code = apiResponse.Code, Data = null, Message = apiResponse.Message };
             if (apiResponse.Code != 0)
                 return result;
             result.Data = new List<OKEXBill>();
@@ -377,10 +276,9 @@ namespace OkxPerpetualArbitrage.OkxApi
                 });
             }
             return result;
-      }
-      
-      public async Task<OKEXResponse<List<decimal>>> GetFundingIncomeHistory(string instrument)
-      {
+        }
+        public async Task<OKEXResponse<List<decimal>>> GetFundingIncomeHistory(string instrument)
+        {
             var url = $"/api/v5/public/funding-rate-history?instId={instrument}";
             var apiResponse = await CallApi(url, HttpMethod.Get);
             var result = new OKEXResponse<List<decimal>>() { Code = apiResponse.Code, Data = null, Message = apiResponse.Message };
@@ -392,47 +290,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 result.Data.Add(Convert.ToDecimal(item.realizedRate));
             }
             return result;
-      }
-        /*
-     public async Task<List<OKEXFundingIncome>> GetFundingIncome(long from)
-   {
-       var resultString = $"/api/v5/account/bills?type=8&before={from}";
-       var result = await CallAsyncSign(HttpMethod.Get, resultString);
-       dynamic o = JsonConvert.DeserializeObject(result);
-       if (o.code != 0)
-           return null;
-       List<OKEXFundingIncome> incomes = new List<OKEXFundingIncome>();
-       foreach (var item in o.data)
-       {
-           incomes.Add(new OKEXFundingIncome()
-           {
-               Amount = Convert.ToDecimal(item.pnl),
-               BillId = Convert.ToInt64(item.billId),
-               Instrument = item.instId,
-               MarginMode = item.mgnMode,
-               Timestamp = DateTimeHelper.GetDateFromUnix(Convert.ToInt64(item.ts))
-           });
-       }
-       return incomes;
-   }
-
-   public async Task<List<string>> GetOptionContracts(string currency, string date)
-   {
-       var resultString = $"/api/v5/public/opt-summary?uly={currency}-USD&expTime={date}";
-
-       var result = await CallAsyncSign(HttpMethod.Get, resultString);
-       dynamic o = JsonConvert.DeserializeObject(result);
-       if (o.code != 0)
-           return null;
-
-       List<string> instruments = new List<string>();
-       foreach (var item in o.data)
-       {
-           instruments.Add(Convert.ToString(item.instId));
-       }
-       return instruments;
-   }
-   */
+        }
         public async Task<OKEXResponse<List<OKEXMarketInfo>>> GetInstruments(OKEXInstrumentType instrumentType, string underlying = "")
         {
             var url = $"/api/v5/market/tickers?instType={instrumentType}";
@@ -460,31 +318,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             }
             return result;
         }
-        /*
-        public async Task<List<OKEXInterestAccured>> GetInterestAccured(string instrument, DateTime fromDate)
-        {
-            var resultString = $"/api/v5/account/interest-accrued?instId={instrument}&before={DateTimeHelper.GetMillisecondsFromEpochStart(fromDate)}";
-            var result = await CallAsyncSign(HttpMethod.Get, resultString);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code != 0)
-                return null;
-            List<OKEXInterestAccured> interests = new List<OKEXInterestAccured>();
-            foreach (var item in o.data)
-            {
-                interests.Add(new OKEXInterestAccured()
-                {
-                    Currency = item.ccy,
-                    Instrument = item.instId,
-                    Interest = item.interest,
-                    InterestRateHourly = item.interestRate,
-                    Liability = item.liab,
-                    MarginMode = item.mgnMode,
-                    TimeStamp = DateTimeHelper.GetDateFromUnix(Convert.ToInt64(item.ts)),
-                });
-            }
-            return interests;
-        }
-        */
         private bool HasData(dynamic data)
         {
             int i = 0;
@@ -540,7 +373,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             }
             return result;
         }
-
         private decimal GetFromDynamic(dynamic field)
         {
             string fieldStr = Convert.ToString(field);
@@ -620,31 +452,9 @@ namespace OkxPerpetualArbitrage.OkxApi
             else
             {
                 respone.Data = false;
-                //   _logger.LogWarning("Failed cancel order: " + result);
             }
             return respone;
         }
-        /*
-        public async Task<bool> AddMarginToIsolatedPosition(string instrument, decimal amount)
-        {
-            var resultString = $"/api/v5/account/position/margin-balance";
-            var body = new
-            {
-                instId = instrument,
-                posSide = "net",
-                type = "add",
-                amt = amount
-            };
-            var bodyStr = JsonConvert.SerializeObject(body);
-            var result = await CallAsyncSign(HttpMethod.Post, resultString, bodyStr);
-            dynamic o = JsonConvert.DeserializeObject(result);
-            if (o.code == 0)
-                return true;
-            return false;
-        }
-        */
-
-
         public async Task<OKEXResponse<bool>> PlaceMarketOrderPosition(string instId, OKEXTadeMode tdMode, string clOrdId, OKEXOrderSide side, string posSide, decimal size, bool reduceOnly)
         {
             var resultString = $"/api/v5/trade/order";
@@ -674,7 +484,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             else
                 respone.Data = false;
             return respone;
-
         }
         public async Task<OKEXResponse<bool>> PlaceMarketOrder(string instId, OKEXTadeMode tdMode, string clOrdId, OKEXOrderSide side, decimal size, bool reduceOnly)
         {
@@ -705,7 +514,6 @@ namespace OkxPerpetualArbitrage.OkxApi
                 respone.Data = false;
             return respone;
         }
-
         public async Task<OKEXResponse<bool>> PlaceLimitOrderPosition(string instId, OKEXTadeMode tdMode, string clOrdId, OKEXOrderSide side, string posSide, decimal size, decimal px, bool reduceOnly)
         {
             var resultString = $"/api/v5/trade/order";
@@ -756,8 +564,7 @@ namespace OkxPerpetualArbitrage.OkxApi
                 clOrdId = clOrdId,
                 side = Convert.ToString(side),
                 sz = sz,
-                reduceOnly = ro//,
-                               //      ccy = "LINK"
+                reduceOnly = ro
             };
             var bodyStr = JsonConvert.SerializeObject(body);
             var result = await CallAsyncSign(HttpMethod.Post, resultString, bodyStr);
@@ -772,7 +579,6 @@ namespace OkxPerpetualArbitrage.OkxApi
 
         private async Task<string> CallAsyncSign(HttpMethod method, string endpoint, string body = null)
         {
-            // endpoint = Url + endpoint;
             var request = new HttpRequestMessage(method, endpoint);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Add("OK-ACCESS-KEY", apiKey);
@@ -788,16 +594,13 @@ namespace OkxPerpetualArbitrage.OkxApi
             {
                 sign = Encryptor.HmacSHA256($"{timeStamp}{method}{endpoint}", apiSecret);
             }
-
             request.Headers.Add("OK-ACCESS-SIGN", sign);
             request.Headers.Add("OK-ACCESS-TIMESTAMP", timeStamp.ToString());
             request.Headers.Add("OK-ACCESS-PASSPHRASE", passPhrase);
-
             var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
             var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return result;
         }
-
 
         public async Task<OKEXResponse<Tuple<DateTime, DateTime>>> GetMaintanaceTime()
         {
@@ -825,7 +628,6 @@ namespace OkxPerpetualArbitrage.OkxApi
             var eDate = DateTimeHelper.GetDateFromUnix(Convert.ToInt64(apiResponse.Data[0].end));
             result.Data = new Tuple<DateTime, DateTime>(sDate, eDate);
             return result;
-
         }
     }
 }

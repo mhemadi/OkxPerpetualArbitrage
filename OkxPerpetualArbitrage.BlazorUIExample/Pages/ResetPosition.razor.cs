@@ -30,8 +30,6 @@ namespace OkxPerpetualArbitrage.BlazorUIExample.Pages
                 Message = ex.Message + ex.StackTrace;
             }
         }
-
-
         private async Task Reset(EventArgs e, string symbol)
         {
 
@@ -50,10 +48,7 @@ namespace OkxPerpetualArbitrage.BlazorUIExample.Pages
             {
                 StatusMessage = Environment.NewLine + ex.Message + ex.StackTrace;
             }
-
             StateHasChanged();
-
-
             await Task.Delay(10 * 1000);
             StatusMessage = "";
 

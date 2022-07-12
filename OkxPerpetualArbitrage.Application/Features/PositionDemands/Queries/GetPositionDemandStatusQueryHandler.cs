@@ -1,16 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Exceptions;
-using OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
-using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries
 {
@@ -32,7 +24,7 @@ namespace OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries
         {
 
             var demand = await _getInProgressDemandsLogic.GetInProggressDemand(request.Symbol);
-            if (demand == null) 
+            if (demand == null)
                 throw new OkxPerpetualArbitrageCustomException("Can not find the one demand corresponding to the symbol");
             var dto = _mapper.Map<PositionDemandStatusDto>(demand);
             return dto;

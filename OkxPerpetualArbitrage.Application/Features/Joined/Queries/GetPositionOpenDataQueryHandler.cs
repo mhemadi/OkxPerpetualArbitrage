@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using MediatR;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
+﻿using MediatR;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
 
 namespace OkxPerpetualArbitrage.Application.Features.Joined.Queries
@@ -21,7 +18,7 @@ namespace OkxPerpetualArbitrage.Application.Features.Joined.Queries
             IOkxApiLogic okxApiLogic, IPotentialPositionProcessorLogic potentialPositionProcessorLogic)
         {
             _inProgressDemandLogic = inProgressDemandLogic;
-           _okxApiLogic = okxApiLogic;
+            _okxApiLogic = okxApiLogic;
             _potentialPositionProcessorLogic = potentialPositionProcessorLogic;
         }
         public async Task<PositionDataDto> Handle(GetPositionOpenDataQuery request, CancellationToken cancellationToken)

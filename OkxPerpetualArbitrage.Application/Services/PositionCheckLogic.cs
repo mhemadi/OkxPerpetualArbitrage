@@ -1,40 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
- 
-
     public class PositionCheckLogic : IPositionCheckLogic
     {
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly IPositionDemandRepository _positionDemandRepository;
         private readonly IOrderFillRepository _orderFillRepository;
         private readonly ILogger<PositionCheckLogic> _logger;
 
-        public PositionCheckLogic(IOkxApiWrapper apiService, IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository
+        public PositionCheckLogic(IOkxApiWrapper apiWrapper, IPositionDemandRepository positionDemandRepository, IOrderFillRepository orderFillRepository
             , ILogger<PositionCheckLogic> logger)
         {
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _positionDemandRepository = positionDemandRepository;
             _orderFillRepository = orderFillRepository;
             _logger = logger;
         }
-
         public async Task Checkposition(string symbol, PotentialPosition pp)
         {
-            var posSize = await _apiService.GetPositionSize(symbol);
+            var posSize = await _apiWrapper.GetPositionSize(symbol);
             posSize *= pp.ContractValuePerp;
-            var spotBalance = await _apiService.GetBalance(symbol);
+            var spotBalance = await _apiWrapper.GetBalance(symbol);
             var cash = spotBalance == null ? 0 : spotBalance.Cash;
             var openDemands = await _positionDemandRepository.GetIncompleteDemands(symbol);
             var fills = new List<OrderFill>();
@@ -49,7 +41,6 @@ namespace OkxPerpetualArbitrage.Application.Services
             size -= fills.Where(x => x.PartInPosition == PartInPosition.PerpCloseSell).Sum(x => x.Filled);
             size *= pp.ContractValuePerp;
 
-
             if (posSize != size)
             {
                 _logger.LogCritical("sum of order fill size {sumSize} is not equal to position size {posSize}", size, posSize);
@@ -58,7 +49,6 @@ namespace OkxPerpetualArbitrage.Application.Services
             {
                 _logger.LogCritical("available balance {cash} is not equal to sum spot size {spotSize}", cash, spotSize);
             }
-
             if (cash < posSize)
             {
                 _logger.LogCritical("available balance {cash} is smaller than position size {posSize}", cash, posSize);

@@ -1,21 +1,16 @@
 ﻿using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
-using OkxPerpetualArbitrage.Application.Services;
-using OkxPerpetualArbitrage.Application.Validators.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
-using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
+using OkxPerpetualArbitrage.Application.Services;
 using OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices;
 using OkxPerpetualArbitrage.Application.Services.Channels;
-using MediatR;
+using OkxPerpetualArbitrage.Application.Validators.DTOs;
+using System.Reflection;
 
 namespace OkxPerpetualArbitrage.Application
 {
@@ -23,7 +18,7 @@ namespace OkxPerpetualArbitrage.Application
     {
         public static void ApplicationServicesRegistration(this IServiceCollection service, IConfiguration configuration)
         {
-           
+
             service.AddAutoMapper(Assembly.GetExecutingAssembly());
             service.AddMediatR(Assembly.GetExecutingAssembly());
             service.AddTransient<IValidator<ClosePositionDto>, ClosePositionDtoValidator>();

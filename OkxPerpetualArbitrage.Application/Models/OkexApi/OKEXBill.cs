@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OkxPerpetualArbitrage.Application.Models.OkexApi
+﻿namespace OkxPerpetualArbitrage.Application.Models.OkexApi
 {
     public class OKEXBill
     {

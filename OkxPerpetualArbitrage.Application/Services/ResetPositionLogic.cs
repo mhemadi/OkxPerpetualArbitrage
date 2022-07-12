@@ -1,18 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-  
-
     public class ResetPositionLogic : IResetPositionLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;
@@ -42,7 +35,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                 if (!demand.IsCanceled)
                 {
                     await _positionDemandRepository.SetIsCanceled(demand.PositionDemandId, true);
-
                 }
             }
             unDones = await _positionDemandRepository.GetIncompleteDemandsNoTracking(symbol);
@@ -55,9 +47,6 @@ namespace OkxPerpetualArbitrage.Application.Services
                     return new ApiCommandResponseDto() { Success = false, Message = "Not all requests are canceled" };
             }
 
-
-            //make sure size is negative for sell orders on both spot and perp
-
             decimal positonSize = await _apiService.GetPositionSize(symbol);
             string orderId = "0";
             if (positonSize != 0)
@@ -68,10 +57,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             if (orderId == "-1")
                 return new ApiCommandResponseDto() { Success = false, Message = "Failed to close position" };
 
-
-
             var pp = await _potentialPositionRepository.GetPotentialPosition(symbol);
-
             var balance = await _apiService.GetBalance(symbol);
             decimal spotSize = balance == null ? 0 : balance.Cash;
             if (spotSize > pp.MinSizeSpot)
@@ -87,7 +73,7 @@ namespace OkxPerpetualArbitrage.Application.Services
                 var ob = await _apiService.GetOrderBook(_apiService.GetSpotInstrument(symbol));
                 var tmpPrice = ob.Asks[0].Price * 1.03m;
                 orderId = await _apiService.PlaceOrder(_apiService.GetSpotInstrument(symbol), Models.OkexApi.Enums.OKEXOrderType.limit, Models.OkexApi.Enums.OKEXTadeMode.cross, Models.OkexApi.Enums.OKEXOrderSide.buy, Models.OkexApi.Enums.OKEXPostitionSide.NotPosition, spotSize, tmpPrice, false);
-                msg += $"sold asset in the amount of {spotSize} . ";
+                msg += $"bought asset in the amount of {spotSize} . ";
             }
             if (orderId == "-1")
                 return new ApiCommandResponseDto() { Success = false, Message = "Failed to settle spot" };
@@ -108,13 +94,11 @@ namespace OkxPerpetualArbitrage.Application.Services
                 msg += $"removed position demand from db . ";
             }
 
-
             await _fundingIncomeRepository.DeleteInPosition(symbol);
             if (string.IsNullOrEmpty(msg))
                 msg = "There was nothing to reset";
 
             return new ApiCommandResponseDto() { Success = true, Message = "Symbol has been reset. " + msg };
-
         }
     }
 }

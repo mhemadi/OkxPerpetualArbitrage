@@ -1,15 +1,9 @@
 ﻿using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
- 
-
     public class TotalAvailableCloseSizeCalculatorLogic : ITotalAvailableCloseSizeCalculatorLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;

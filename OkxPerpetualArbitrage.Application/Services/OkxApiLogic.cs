@@ -1,14 +1,8 @@
-﻿using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
-using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
     public class OkxApiLogic : IOkxApiLogic
     {
         private readonly IOkxApiWrapper _okxApi;
@@ -21,6 +15,5 @@ namespace OkxPerpetualArbitrage.Application.Services
         {
             return (await _okxApi.GetUSDTBalance()).Available;
         }
-
     }
 }

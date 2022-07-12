@@ -2,23 +2,18 @@
 using Microsoft.Extensions.Logging;
 using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
 {
-
+    /// <summary>
+    /// Perfomrs clean up jobs on unused data  
+    /// </summary>
 
     public class Cleaner : ICleaner
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Cleaner> _logger;
-        private int counter = 0;
-        private bool reset = false;
+        private readonly int wait = 10 * 60 * 1000;
 
         public Cleaner(IServiceProvider serviceProvider, ILogger<Cleaner> logger)
         {
@@ -47,7 +42,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                     _logger.LogError(ex, "Failed cleaning");
                 }
                 _logger.LogInformation("Saved cleaning");
-                await Task.Delay(10 * 60 * 1000, stoppingToken);
+                await Task.Delay(wait, stoppingToken);
 
             }
         }
@@ -64,12 +59,12 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
             }
         }
 
-        public async Task CleanOldRatingHistory(IPotentialPositionRatingHistoryRepository  potentialPositionRatingHistoryRepository)
+        public async Task CleanOldRatingHistory(IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository)
         {
             var olds = await potentialPositionRatingHistoryRepository.GetAllAsync();
             olds = olds.Where(x => x.Timestamp < DateTime.UtcNow.AddDays(-2)).ToList();
             for (int i = 0; i < olds.Count; i++)
-            {             
+            {
                 await potentialPositionRatingHistoryRepository.DeleteAsync(olds[i]);
             }
         }

@@ -1,12 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
 {
@@ -18,15 +13,13 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
         private readonly ILogger<PositionOpener> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IOpenPositionProcessingChannel _openPositionProcessingChannel;
-        private readonly GeneralSetting _setting;
         private IPositionOpenCloseLogic _positionOpenCloseLogic;
 
-        public PositionOpener(ILogger<PositionOpener> logger, IServiceProvider serviceProvider, IOpenPositionProcessingChannel openPositionProcessingChannel, IOptions<GeneralSetting> setting)
+        public PositionOpener(ILogger<PositionOpener> logger, IServiceProvider serviceProvider, IOpenPositionProcessingChannel openPositionProcessingChannel)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _openPositionProcessingChannel = openPositionProcessingChannel;
-            _setting = setting.Value;
         }
 
         public async Task ExecuteAsync(CancellationToken stoppingToken)

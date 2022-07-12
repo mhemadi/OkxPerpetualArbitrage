@@ -1,10 +1,6 @@
 ﻿using MediatR;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
-using OkxPerpetualArbitrage.Domain.Entities;
-using OkxPerpetualArbitrage.Domain.Entities.Enums;
 
 
 namespace OkxPerpetualArbitrage.Application.Features.Joined.Queries

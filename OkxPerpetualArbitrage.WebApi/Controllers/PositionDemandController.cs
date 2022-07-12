@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OkxPerpetualArbitrage.Application.Features.PositionDemands.Commands;
 using OkxPerpetualArbitrage.Application.Features.PositionDemands.Queries;
-using OkxPerpetualArbitrage.Application.Models.DTOs;
 
 namespace OkxPerpetualArbitrage.WebApi.Controllers
 {

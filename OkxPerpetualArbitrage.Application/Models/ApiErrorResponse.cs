@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Models
 {
-    public class ErrorDetails
+    public class ApiErrorResponse
     {
         public int StatusCode { get; set; }
         public string Message { get; set; }

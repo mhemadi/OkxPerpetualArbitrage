@@ -1,10 +1,5 @@
 ﻿using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
@@ -21,7 +16,7 @@ namespace OkxPerpetualArbitrage.Application.Services
 
         public async Task Close(string symbol, int positionDemandId, decimal lotSize, decimal lotSizeChunk, decimal minSpread, PotentialPosition potentialPosition, bool isInstant)
         {
-           await _positionCloseLogic.Close(symbol, positionDemandId, lotSize, lotSizeChunk, minSpread, potentialPosition, isInstant);
+            await _positionCloseLogic.Close(symbol, positionDemandId, lotSize, lotSizeChunk, minSpread, potentialPosition, isInstant);
         }
 
         public async Task Open(string symbol, int positionDemandId, decimal lotSize, decimal lotSizeChunk, decimal minSpread, PotentialPosition potentialPosition)

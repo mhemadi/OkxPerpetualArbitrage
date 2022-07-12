@@ -49,7 +49,6 @@ namespace OkxPerpetualArbitrage.BlazorUIExample.Pages
             }
            await  Task.Delay(2 * 1000);
             StatusMessage = "";
-           // StateHasChanged();
         }
         private async Task UpdatePostions(bool withError = false)
         {

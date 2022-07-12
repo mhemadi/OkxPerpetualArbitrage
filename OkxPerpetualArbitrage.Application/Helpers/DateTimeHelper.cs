@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OkxPerpetualArbitrage.Application.Helpers
+﻿namespace OkxPerpetualArbitrage.Application.Helpers
 {
     public static class DateTimeHelper
     {

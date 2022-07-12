@@ -2,16 +2,9 @@
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
- 
-
     public class CancelDemandLogic : ICancelDemandLogic
     {
         private readonly IPositionDemandRepository _positionDemandRepository;

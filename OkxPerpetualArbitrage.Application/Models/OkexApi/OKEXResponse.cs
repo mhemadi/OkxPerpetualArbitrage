@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OkxPerpetualArbitrage.Application.Models.OkexApi
+﻿namespace OkxPerpetualArbitrage.Application.Models.OkexApi
 {
     public class OKEXResponse<T>
     {

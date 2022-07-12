@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OkxPerpetualArbitrage.Application.Contracts.Logic
+﻿namespace OkxPerpetualArbitrage.Application.Contracts.Logic
 {
     public interface IOkxApiLogic
     {

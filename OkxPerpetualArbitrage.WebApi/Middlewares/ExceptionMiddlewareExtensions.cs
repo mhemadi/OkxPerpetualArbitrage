@@ -17,14 +17,14 @@ namespace OkxPerpetualArbitrage.WebApi.Middlewares
                     context.Response.ContentType = "application/json";
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-                    
-                        ILogger l = app.ApplicationServices.GetRequiredService<ILogger<OkxPerpetualArbitrageCustomException>>();
+
+                    ILogger l = app.ApplicationServices.GetRequiredService<ILogger<OkxPerpetualArbitrageCustomException>>();
                     if (exceptionHandlerPathFeature != null)
                     {
                         l.LogError($"Something went wrong: {exceptionHandlerPathFeature.Error}");
                         if (exceptionHandlerPathFeature?.Error is OkxPerpetualArbitrageCustomException)
                         {
-                            await context.Response.WriteAsync(new ErrorDetails()
+                            await context.Response.WriteAsync(new ApiErrorResponse()
                             {
                                 StatusCode = context.Response.StatusCode,
                                 Message = exceptionHandlerPathFeature.Error.Message
@@ -32,7 +32,7 @@ namespace OkxPerpetualArbitrage.WebApi.Middlewares
                         }
                         else
                         {
-                            await context.Response.WriteAsync(new  ErrorDetails()
+                            await context.Response.WriteAsync(new ApiErrorResponse()
                             {
                                 StatusCode = context.Response.StatusCode,
                                 Message = "Internal Server Error."

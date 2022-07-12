@@ -3,9 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Persistance.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OkxPerpetualArbitrage.Persistance
 {
@@ -13,8 +10,6 @@ namespace OkxPerpetualArbitrage.Persistance
     {
         public static void PersistanceServicesRegistration(this IServiceCollection service, IConfiguration configuration)
         {
-            // @"Data Source=C:\sqliteStudio\SPA.db"
-            //  service.AddAutoMapper(Assembly.GetExecutingAssembly());
             service.AddDbContext<SpotPerpDbContext>(options => options.UseSqlite(configuration.GetConnectionString("sqliteConnectionString")));
             service.AddScoped(typeof(IAsyncRepository<>), typeof(AsyncRepository<>));
             service.AddScoped<IFundingIncomeRepository, FundingIncomeRepository>();

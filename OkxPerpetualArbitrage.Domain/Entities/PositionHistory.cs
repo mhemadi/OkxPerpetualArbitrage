@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OkxPerpetualArbitrage.Domain.Entities
+﻿namespace OkxPerpetualArbitrage.Domain.Entities
 {
     public class PositionHistory
     {
@@ -14,6 +10,6 @@ namespace OkxPerpetualArbitrage.Domain.Entities
         public decimal PerpTrade { get; set; }
         public decimal Fee { get; set; }
         public decimal Funding { get; set; }
-        public  decimal TotalPNL { get; set; }
+        public decimal TotalPNL { get; set; }
     }
 }

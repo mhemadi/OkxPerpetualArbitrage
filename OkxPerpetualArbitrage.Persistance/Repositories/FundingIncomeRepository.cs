@@ -1,17 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Persistance.Repositories
 {
     public class FundingIncomeRepository : AsyncRepository<FundingIncome>, IFundingIncomeRepository
     {
-        public FundingIncomeRepository(SpotPerpDbContext spotPerpDbContext) : base (spotPerpDbContext)
+        public FundingIncomeRepository(SpotPerpDbContext spotPerpDbContext) : base(spotPerpDbContext)
         {
         }
         public async Task AddAll(List<FundingIncome> fundingIncomes)
@@ -27,14 +22,14 @@ namespace OkxPerpetualArbitrage.Persistance.Repositories
 
         public async Task DeleteInPosition(string symbol)
         {
-            var list =  _dbContext.FundingIncomes.Where(x => x.IsInCurrentPosition && x.Symbol == symbol);
+            var list = _dbContext.FundingIncomes.Where(x => x.IsInCurrentPosition && x.Symbol == symbol);
             _dbContext.FundingIncomes.RemoveRange(list);
             await _dbContext.SaveChangesAsync();
         }
 
         public async Task EndCurrentPositionStatus(string symbol)
         {
-            foreach (var f in  _dbContext.FundingIncomes.Where(x => x.IsInCurrentPosition && x.Symbol == symbol))
+            foreach (var f in _dbContext.FundingIncomes.Where(x => x.IsInCurrentPosition && x.Symbol == symbol))
             {
                 f.IsInCurrentPosition = false;
                 _dbContext.FundingIncomes.Update(f);

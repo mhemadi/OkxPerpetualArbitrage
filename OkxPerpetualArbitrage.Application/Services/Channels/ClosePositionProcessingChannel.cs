@@ -2,15 +2,11 @@
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
 using OkxPerpetualArbitrage.Application.Models.Channels;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Channels;
 
 namespace OkxPerpetualArbitrage.Application.Services.Channels
 {
-  
+
 
     public class ClosePositionProcessingChannel : IClosePositionProcessingChannel
     {
@@ -28,7 +24,6 @@ namespace OkxPerpetualArbitrage.Application.Services.Channels
 
             if (_channel.Writer.TryWrite(closePositionProcessingChannelDto))
             {
-           //     _logger.LogInformation("Success in writing to open position channel {@closePositionProcessingChannelDto}", closePositionProcessingChannelDto);
                 return true;
             }
 

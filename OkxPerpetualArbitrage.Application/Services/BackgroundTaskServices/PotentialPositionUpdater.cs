@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.BackgroundService;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Helpers;
 using OkxPerpetualArbitrage.Domain.Entities;
@@ -25,6 +19,8 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
         private readonly ILogger<PotentialPositionUpdater> _logger;
         private int counter = 0;
         private bool reset = false;
+        private readonly int resetOnTryNumber = 500;
+        private readonly int wait = 1 * 1000;
 
         public PotentialPositionUpdater(IServiceProvider serviceProvider, ILogger<PotentialPositionUpdater> logger)
         {
@@ -40,7 +36,7 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
-                        if (counter == 500)
+                        if (counter == resetOnTryNumber)
                         {
                             reset = true;
                             counter = 0;
@@ -50,49 +46,42 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                             reset = false;
 
                         counter++;
-                        var _apiService = scope.ServiceProvider.GetRequiredService<IOkxApiWrapper>();
-                        var _potentialPositionRep = scope.ServiceProvider.GetRequiredService<IPotentialPositionRepository>();
+                        var apiWrapper = scope.ServiceProvider.GetRequiredService<IOkxApiWrapper>();
+                        var potentialPositionRep = scope.ServiceProvider.GetRequiredService<IPotentialPositionRepository>();
                         var positionDemandRepository = scope.ServiceProvider.GetRequiredService<IPositionDemandRepository>();
                         var ratingReposirtory = scope.ServiceProvider.GetRequiredService<IPotentialPositionRatingHistoryRepository>();
-
-                        await SavePotentialPositions(_apiService, _potentialPositionRep, ratingReposirtory);
+                        await SavePotentialPositions(apiWrapper, potentialPositionRep, ratingReposirtory);
                     }
-
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed updating pp");
                 }
                 _logger.LogInformation("Saved PPs");
-                await Task.Delay(1 * 1 * 1000, stoppingToken);
-
+                await Task.Delay(wait, stoppingToken);
             }
         }
 
 
-        public async Task SavePotentialPositions(IOkxApiWrapper _apiService, IPotentialPositionRepository _potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository)
+        public async Task SavePotentialPositions(IOkxApiWrapper apiWrapper, IPotentialPositionRepository potentialPositionRep, IPotentialPositionRatingHistoryRepository potentialPositionRatingHistoryRepository)
         {
             List<decimal> ratings = new List<decimal>();
-            var symbols = await _apiService.GetAllSymbols(2, 1000);
+            apiWrapper.SetMaxTry(2);
+            apiWrapper.SetWait(1 * 1000);
+            var symbols = await apiWrapper.GetAllSymbols();
             if (symbols == null || symbols.Count == 0)
             {
-                _logger.LogError("Failed to save potential positions");
+                _logger.LogError("Failed to get symbols and save potential positions");
                 return;
             }
-
-
-            var all = await _potentialPositionRep.GetAllAsync();
-
-
-
+            var all = await potentialPositionRep.GetAllAsync();
             foreach (var symbol in symbols)
             {
-                await _potentialPositionRep.UnUpToDate(symbol.Instrument);
-                var fundings = await _apiService.GetFundingRates(symbol.Instrument, 5, 100);
+                await potentialPositionRep.UnUpToDate(symbol.Instrument);
+                var fundings = await apiWrapper.GetFundingRates(symbol.Instrument);
                 var spread = (symbol.PerpBid - symbol.SpotAsk) / ((symbol.PerpBid + symbol.SpotAsk) / 2);
                 var closeSpread = (symbol.SpotBid - symbol.PerpAsk) / ((symbol.PerpAsk + symbol.SpotBid) / 2);
-                var rateHistory = await _apiService.GetFundingHistory(symbol.Instrument, 3,1000);
-
+                var rateHistory = await apiWrapper.GetFundingHistory(symbol.Instrument, 3);
 
                 var ratingAvg3Days = rateHistory.Average();
                 var ratingAvg7Days = rateHistory.Average();
@@ -102,41 +91,9 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                 if (rateHistory.Count > 21)
                     ratingAvg7Days = rateHistory.GetRange(0, 21).Average();
 
-
-                var nf = (fundings.Item2 * 1.5m);
-                if (nf > 0)
-                    nf *= (1 - (DateTimeHelper.TimeToFunding().Hours / 8m));
-                var cf = (fundings.Item1 * 1.5m);
-                spread /= 3;
-                if (spread > 0)
-                    spread /= 2;
-
-                if ((nf > 0 && cf > 0) || (nf < 0 && cf < 0))
-                {
-                    nf *= 2m;
-                    cf *= 2m;
-                }
-                if (spread < 0)
-                    spread *= 4m;
-                if (spread < -0.05m)
-                    spread *= 4m;
-                if (spread < -0.1m)
-                    spread *= 4m;
-
-                //    var rateHistory = await _apiService.GetFundingHistory(symbol.Instrument);
-                var avgRate = ratingAvg3Days + ratingAvg14Days + ratingAvg7Days;
-                if ((ratingAvg3Days > 0 && ratingAvg14Days > 0 && ratingAvg7Days > 0) || (ratingAvg3Days < 0 && ratingAvg14Days < 0 && ratingAvg7Days < 0))
-                    avgRate *= 2;
-
-                var rating = (spread) + nf + cf + avgRate;
-
-
-
-
+                var rating = GetRating(fundings, spread, ratingAvg3Days, ratingAvg14Days, ratingAvg7Days);
+        
                 var pp = all.Where(x => x.Symbol == symbol.Instrument).FirstOrDefault();
-
-
-
                 if (pp != null)
                 {
                     pp.Funding = Math.Round(fundings.Item1 * 100, 4);
@@ -151,11 +108,11 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                     pp.FundingRateAverageFourteenDays = ratingAvg14Days;
                     if (reset)
                     {
-                        var perpContract = await _apiService.GetPerpContractData(symbol.Instrument, 2, 1000);
+                        var perpContract = await apiWrapper.GetPerpContractData(symbol.Instrument);
                         await Task.Delay(100);
-                        var spotContract = await _apiService.GetSpotContractData(symbol.Instrument, 2, 1000);
+                        var spotContract = await apiWrapper.GetSpotContractData(symbol.Instrument);
                         await Task.Delay(100);
-                        var fees = await _apiService.GetSpotAndPerpMakerAndTakerFees(symbol.Instrument, 2, 1000);
+                        var fees = await apiWrapper.GetSpotAndPerpMakerAndTakerFees(symbol.Instrument);
                         await Task.Delay(100);
                         if (perpContract == null || spotContract == null || fees == null)
                         {
@@ -173,15 +130,15 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                         pp.TickSizePerp = perpContract.Item2;
                         pp.TickSizeSpot = spotContract.Item3;
                     }
-                    await _potentialPositionRep.UpdateAsync(pp);
+                    await potentialPositionRep.UpdateAsync(pp);
                 }
                 else
                 {
-                    var perpContract = await _apiService.GetPerpContractData(symbol.Instrument, 2, 1000);
+                    var perpContract = await apiWrapper.GetPerpContractData(symbol.Instrument);
                     await Task.Delay(100);
-                    var spotContract = await _apiService.GetSpotContractData(symbol.Instrument, 2, 1000);
+                    var spotContract = await apiWrapper.GetSpotContractData(symbol.Instrument);
                     await Task.Delay(100);
-                    var fees = await _apiService.GetSpotAndPerpMakerAndTakerFees(symbol.Instrument, 2, 1000);
+                    var fees = await apiWrapper.GetSpotAndPerpMakerAndTakerFees(symbol.Instrument);
                     await Task.Delay(100);
                     if (perpContract == null || spotContract == null || fees == null)
                     {
@@ -212,26 +169,41 @@ namespace OkxPerpetualArbitrage.Application.Services.BackgroundTaskServices
                         FundingRateAverageFourteenDays = ratingAvg14Days,
                         MarkPrice = Math.Round((symbol.PerpBid + symbol.SpotAsk) / 2, 10)
                     };
-                    await _potentialPositionRep.AddAsync(ppNew);
-
-
-
+                    await potentialPositionRep.AddAsync(ppNew);
                 }
             }
-
-            //all = await _potentialPositionRep.GetAllAsync();
-
-            //var sorted = all.OrderByDescending(x => x.Rating).ToList();
-            //if (sorted.Count > 1)
-            //{
-            //    await potentialPositionRatingHistoryRepository.AddAsync(new PotentialPositionRatingHistory() { Rating = sorted[0].Rating, Symbol = sorted[0].Symbol, Timestamp = DateTime.UtcNow });
-            //    await potentialPositionRatingHistoryRepository.AddAsync(new PotentialPositionRatingHistory() { Rating = sorted[1].Rating, Symbol = sorted[1].Symbol, Timestamp = DateTime.UtcNow });
-            //}
-
-
         }
 
+        private decimal GetRating(Tuple<decimal, decimal> fundings, decimal spread, decimal ratingAvg3Days
+            , decimal ratingAvg14Days, decimal ratingAvg7Days)
+        {
+            var nf = (fundings.Item2 * 1.5m);
+            if (nf > 0)
+                nf *= (1 - (DateTimeHelper.TimeToFunding().Hours / 8m));
+            var cf = (fundings.Item1 * 1.5m);
+            spread /= 3;
+            if (spread > 0)
+                spread /= 2;
 
+            if ((nf > 0 && cf > 0) || (nf < 0 && cf < 0))
+            {
+                nf *= 2m;
+                cf *= 2m;
+            }
+            if (spread < 0)
+                spread *= 4m;
+            if (spread < -0.05m)
+                spread *= 4m;
+            if (spread < -0.1m)
+                spread *= 4m;
 
+            var avgRate = ratingAvg3Days + ratingAvg14Days + ratingAvg7Days;
+
+            if ((ratingAvg3Days > 0 && ratingAvg14Days > 0 && ratingAvg7Days > 0) || (ratingAvg3Days < 0 && ratingAvg14Days < 0 && ratingAvg7Days < 0))
+                avgRate *= 2;
+            var rating = (spread) + nf + cf + avgRate;
+
+            return rating;
+        }
     }
 }

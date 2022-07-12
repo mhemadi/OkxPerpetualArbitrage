@@ -1,13 +1,6 @@
 ﻿using MediatR;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
-using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
-using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Features.PositionDemands.Commands
 {

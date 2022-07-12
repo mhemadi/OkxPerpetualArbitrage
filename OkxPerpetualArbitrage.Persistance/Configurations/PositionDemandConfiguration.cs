@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OkxPerpetualArbitrage.Persistance.Configurations
 {
@@ -21,9 +18,8 @@ namespace OkxPerpetualArbitrage.Persistance.Configurations
             entity.Property(e => e.IsCanceled).IsRequired();
             entity.Property(e => e.OpenDate).HasColumnType(SqlDataTypes.Date);
             entity.Property(e => e.UpdateDate).HasColumnType(SqlDataTypes.Date);
-
             entity.Property(e => e.PositionDemandState).IsRequired();
             entity.Property(e => e.PositionDemandSide).IsRequired();
-        }      
+        }
     }
 }

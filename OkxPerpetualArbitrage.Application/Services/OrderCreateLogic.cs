@@ -1,40 +1,35 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class OrderCreateLogic : IOrderCreateLogic
     {
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly ILogger<OrderCreateLogic> _logger;
 
-        public OrderCreateLogic(IOkxApiWrapper apiService, ILogger<OrderCreateLogic> logger)
+        public OrderCreateLogic(IOkxApiWrapper apiWrapper, ILogger<OrderCreateLogic> logger)
         {
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _logger = logger;
         }
         public async Task<string> CreatePerpOrder(string symbol, decimal spreadThreshold, decimal size, PotentialPosition pp, bool tryToBeMaker, bool open)
         {
-            string perpInstrumnet = _apiService.GetPerpInstrument(symbol);
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
+            string perpInstrumnet = _apiWrapper.GetPerpInstrument(symbol);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
             OrderBook spotOrderBook = new OrderBook();
             OrderBook perpOrderBook = new OrderBook();
+            _apiWrapper.SetWait(200);
+            _apiWrapper.SetMaxTry(50);
             for (int i = 0; i < 3; i++)
             {
                 await Task.Delay(1 * 1000);
-                spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 3, 100);
-                perpOrderBook = await _apiService.GetOrderBook(perpInstrumnet, 3, 100);
+                spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
+                perpOrderBook = await _apiWrapper.GetOrderBook(perpInstrumnet);
                 if (perpOrderBook == null || spotOrderBook == null)
                 {
                     _logger.LogError("Failed to get order books to create perp order for {symbol}", symbol);
@@ -61,12 +56,12 @@ namespace OkxPerpetualArbitrage.Application.Services
             OKEXOrderSide side = OKEXOrderSide.sell;
             if (!open)
                 side = OKEXOrderSide.buy;
-            return await _apiService.PlaceOrder(perpInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.SHORT, size, perpPrice, !open, 10, 100);
+            return await _apiWrapper.PlaceOrder(perpInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.SHORT, size, perpPrice, !open);
         }
         public async Task<Tuple<string, decimal>> CreateFirstSpotOrder(string symbol, decimal perpOrderSize, PotentialPosition pp, bool tryToBeMaker, bool open)
         {
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 100, 500);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            var spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
             if (spotOrderBook == null)
             {
                 _logger.LogError("Failed to get order books to create order for {symbol}", symbol);
@@ -98,13 +93,15 @@ namespace OkxPerpetualArbitrage.Application.Services
             if (!open)
                 side = OKEXOrderSide.sell;
 
-            var orderId = await _apiService.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.NotPosition, spotSize, spotPrice, false, 500, 500);
+            var orderId = await _apiWrapper.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.NotPosition, spotSize, spotPrice, false);
             return new Tuple<string, decimal>(orderId, spotSize);
         }
         public async Task<string> CreateAdditionalSpotOrder(string symbol, PotentialPosition pp, decimal spotSize, bool tryToBeMaker, bool open)
         {
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 100, 500);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            _apiWrapper.SetWait(500);
+            _apiWrapper.SetMaxTry(200);
+            var spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
             if (spotOrderBook == null)
             {
                 _logger.LogError("Failed to get order books to create order for {symbol}", symbol);
@@ -124,7 +121,7 @@ namespace OkxPerpetualArbitrage.Application.Services
             OKEXOrderSide side = OKEXOrderSide.buy;
             if (!open)
                 side = OKEXOrderSide.sell;
-            return await _apiService.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.NotPosition, spotSize, spotPrice, false, 500, 500);
+            return await _apiWrapper.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, side, OKEXPostitionSide.NotPosition, spotSize, spotPrice, false);
 
         }
     }

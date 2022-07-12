@@ -1,28 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Models.InfrastructureSettings;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi.Enums;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class PositionChunkCreateLogic : IPositionChunkCreateLogic
     {
         private readonly ILogger<PositionChunkCreateLogic> _logger;
         private readonly IPositionDemandRepository _positionDemandRepository;
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly IOrderCreateLogic _orderCreateLogic;
         private readonly IOrderStateCheckLogic _orderStateCheckLogic;
         private readonly IOrderFillCreateLogic _orderFillCreateLogic;
@@ -30,12 +23,12 @@ namespace OkxPerpetualArbitrage.Application.Services
 
 
         public PositionChunkCreateLogic(ILogger<PositionChunkCreateLogic> logger, IPositionDemandRepository positionDemandRepository,
-          IOkxApiWrapper apiService, IOptions<GeneralSetting> setting, IOrderCreateLogic orderCreateLogic, IOrderStateCheckLogic orderStateCheckLogic,
+          IOkxApiWrapper apiWrapper, IOptions<GeneralSetting> setting, IOrderCreateLogic orderCreateLogic, IOrderStateCheckLogic orderStateCheckLogic,
           IOrderFillCreateLogic orderFillCreateLogic)
         {
             _logger = logger;
             _positionDemandRepository = positionDemandRepository;
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _orderCreateLogic = orderCreateLogic;
             _orderStateCheckLogic = orderStateCheckLogic;
             _orderFillCreateLogic = orderFillCreateLogic;
@@ -48,51 +41,53 @@ namespace OkxPerpetualArbitrage.Application.Services
             int maxTries = _setting.MaxCloseTries;
             if (open)
                 maxTries = _setting.MaxOpenTries;
-            var tmp = await _positionDemandRepository.GetIncompleteDemandsNoTracking(symbol);
+            //var tmp = await _positionDemandRepository.GetIncompleteDemandsNoTracking(symbol);
             var demand = await _positionDemandRepository.GetPositionDemandNoTracking(positionDemandId);
-
             if (demand == null)
             {
                 _logger.LogError("Could not find the demand to close the position chunck {symbol} {positionDemandId} ", symbol, positionDemandId);
                 throw new Exception("Could not find the demand to close the position chunck");
             }
-            string perpInstrumnet = _apiService.GetPerpInstrument(symbol);
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
+            string perpInstrumnet = _apiWrapper.GetPerpInstrument(symbol);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
             decimal filledLotPerp = 0;
             string perpOrderId = "-1";
             string spotOrderId = "-1";
             int tries = 0;
             int spotTries;
             int spotLimitTries = 0;
-            int maxSpotLimitTries = 2;// _setting.MaxCloseTries;
+            int maxSpotLimitTries = _setting.LimitOrderTriesBeforeMarketOrder;
             OKEXOrder perpOrder;
             OKEXOrder spotOrder;
             decimal spotSize;
+            _apiWrapper.SetWait(500);
+            _apiWrapper.SetMaxTry(100);
             while (filledLotPerp < lotSizeChunk)
             {
-                
+
                 tries++;
                 demand = await _positionDemandRepository.GetPositionDemandNoTracking(positionDemandId);
                 if (perpOrderId == "-1")
                 {
-                    if (tries >= _setting.MaxCloseTries || demand.IsCanceled)
+                    if (tries >= maxTries || demand.IsCanceled)
                         break;
                     perpOrderId = await _orderCreateLogic.CreatePerpOrder(symbol, minSpread, lotSizeChunk - filledLotPerp, potentialPosition, tryToBeMaker, open);
                     if (perpOrderId == "-1")
                         continue;
                 }
                 await Task.Delay(100);
-                perpOrder = await _apiService.GetOrder(perpInstrumnet, perpOrderId, 20, 500);
+
+                perpOrder = await _apiWrapper.GetOrder(perpInstrumnet, perpOrderId);
                 if (perpOrder == null)
                 {
                     _logger.LogCritical("Failed to retrieve {perpOrderId} for {symbol}", perpOrderId, symbol);
-                    bool tmpCancel = await _apiService.CancelOrder(perpInstrumnet, perpOrderId, 100, 1000);
+                    bool tmpCancel = await _apiWrapper.CancelOrder(perpInstrumnet, perpOrderId);
                     if (!tmpCancel)
                     {
                         _logger.LogCritical("Failed to cancel {perpOrderId} for {symbol}. Exiting the method", perpOrderId, symbol);
                         return filledLotPerp;
                     }
-                    perpOrder = await _apiService.GetOrder(perpInstrumnet, perpOrderId, 100, 500);
+                    perpOrder = await _apiWrapper.GetOrder(perpInstrumnet, perpOrderId);
                     if (perpOrder == null)
                     {
                         _logger.LogCritical("Failed to retrieve {perpOrderId} for {symbol} even after canceling it", perpOrderId, symbol);
@@ -108,14 +103,14 @@ namespace OkxPerpetualArbitrage.Application.Services
 
                 if (!tryToBeMaker || await _orderStateCheckLogic.CanKeepOrderPerp(symbol, perpOrder, minSpread, open) == false || perpOrder.Size != 0)
                 {
-                    bool wasCanceled = await _apiService.CancelOrder(perpInstrumnet, perpOrderId, 500, 500);
+                    bool wasCanceled = await _apiWrapper.CancelOrder(perpInstrumnet, perpOrderId);
                     if (!wasCanceled)
                     {
                         _logger.LogCritical("Failed to cancel {perpOrderId} for {symbol}. Continuing the loop", perpOrderId, symbol);
                         continue;
                     }
                     await Task.Delay(10);
-                    perpOrder = await _apiService.GetOrder(perpInstrumnet, perpOrderId, 100, 500);
+                    perpOrder = await _apiWrapper.GetOrder(perpInstrumnet, perpOrderId);
                     if (perpOrder == null)
                     {
                         _logger.LogCritical("Failed to retrieve {perpOrderId} for {symbol}  after canceling it. Exiting the method ", perpOrderId, symbol);
@@ -138,6 +133,7 @@ namespace OkxPerpetualArbitrage.Application.Services
                         return filledLotPerp;
                     }
                     spotTries = 0;
+                    spotLimitTries = 0;
                     while (spotSize > 0)
                     {
 
@@ -154,14 +150,14 @@ namespace OkxPerpetualArbitrage.Application.Services
                         if (spotLimitTries >= maxSpotLimitTries)
                         {
 
-                            if (await _apiService.CancelOrder(spotInstrumnet, spotOrderId, 100, 500) == false)
+                            if (await _apiWrapper.CancelOrder(spotInstrumnet, spotOrderId) == false)
                             {
                                 _logger.LogCritical("Failed to cancel {spotOrderId} for {symbol}. Continuing the loop", spotOrderId, symbol);
                                 spotTries++;
                                 continue;
                             }
                             await Task.Delay(100);
-                            spotOrder = await _apiService.GetOrder(spotInstrumnet, spotOrderId, 100, 500);
+                            spotOrder = await _apiWrapper.GetOrder(spotInstrumnet, spotOrderId);
                             if (spotOrder == null)
                             {
                                 _logger.LogCritical("Failed to retrieve {spotOrderId} for {symbol}  after canceling it. Continuing the loop", spotOrderId, symbol);
@@ -191,16 +187,16 @@ namespace OkxPerpetualArbitrage.Application.Services
                             }
                             if (!open)
                             {
-                                spotOrderId = await _apiService.PlaceOrder(spotInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.sell, OKEXPostitionSide.NotPosition, spotSize, 0, false, 500, 500);
+                                spotOrderId = await _apiWrapper.PlaceOrder(spotInstrumnet, OKEXOrderType.market, OKEXTadeMode.cross, OKEXOrderSide.sell, OKEXPostitionSide.NotPosition, spotSize, 0, false);
                             }
 
                             if (open)
                             {
-                                var ob = await _apiService.GetOrderBook(spotInstrumnet, 500, 500);
+                                var ob = await _apiWrapper.GetOrderBook(spotInstrumnet);
                                 var tmpPrice = spotOrder.InitialPrice * 1.04m;
                                 if (ob != null)
                                     tmpPrice = ob.Asks[0].Price * 1.03m;
-                                spotOrderId = await _apiService.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, OKEXOrderSide.buy, OKEXPostitionSide.NotPosition, spotSize, tmpPrice, false, 500, 500);
+                                spotOrderId = await _apiWrapper.PlaceOrder(spotInstrumnet, OKEXOrderType.limit, OKEXTadeMode.cross, OKEXOrderSide.buy, OKEXPostitionSide.NotPosition, spotSize, tmpPrice, false);
                             }
 
                             if (spotOrderId == "-1")
@@ -210,7 +206,7 @@ namespace OkxPerpetualArbitrage.Application.Services
                             }
 
                             await Task.Delay(100);
-                            spotOrder = await _apiService.GetOrder(spotInstrumnet, spotOrderId, 500, 1000);
+                            spotOrder = await _apiWrapper.GetOrder(spotInstrumnet, spotOrderId);
                             if (spotOrder == null)
                             {
                                 _logger.LogCritical("Failed getting the final market spot order for {symbol} and {spotOrderId]. Make sure all orders are filled and add the record to orderfill manualy", symbol, spotOrderId);
@@ -230,7 +226,7 @@ namespace OkxPerpetualArbitrage.Application.Services
 
 
                         await Task.Delay(10);
-                        spotOrder = await _apiService.GetOrder(spotInstrumnet, spotOrderId, 100, 500);
+                        spotOrder = await _apiWrapper.GetOrder(spotInstrumnet, spotOrderId);
                         if (spotOrder == null)
                         {
                             _logger.LogCritical("Failed to retrieve {spotOrderId} for {symbol}. Continuing the loop", spotOrderId, symbol);
@@ -245,14 +241,14 @@ namespace OkxPerpetualArbitrage.Application.Services
 
                         if (!isValid)
                         {
-                            if (await _apiService.CancelOrder(spotInstrumnet, spotOrderId, 100, 500) == false)
+                            if (await _apiWrapper.CancelOrder(spotInstrumnet, spotOrderId) == false)
                             {
                                 _logger.LogCritical("Failed to cancel {spotOrderId} for {symbol}. Continuing the loop", spotOrderId, symbol);
                                 spotTries++;
                                 continue;
                             }
                             await Task.Delay(100);
-                            spotOrder = await _apiService.GetOrder(spotInstrumnet, spotOrderId, 100, 500);
+                            spotOrder = await _apiWrapper.GetOrder(spotInstrumnet, spotOrderId);
                             if (spotOrder == null)
                             {
                                 _logger.LogCritical("Failed to retrieve {spotOrderId} for {symbol}  after canceling it. Continuing the loop", spotOrderId, symbol);

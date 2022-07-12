@@ -1,10 +1,5 @@
-﻿using OkxPerpetualArbitrage.Application.Features.Joined.Commands;
-using OkxPerpetualArbitrage.Application.Models.DTOs;
+﻿using OkxPerpetualArbitrage.Application.Models.DTOs;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Contracts.Logic
 {

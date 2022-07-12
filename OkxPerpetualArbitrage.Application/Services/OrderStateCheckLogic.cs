@@ -1,33 +1,28 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Models.OkexApi;
 using OkxPerpetualArbitrage.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
     public class OrderStateCheckLogic : IOrderStateCheckLogic
     {
-        private readonly IOkxApiWrapper _apiService;
+        private readonly IOkxApiWrapper _apiWrapper;
         private readonly ILogger<OrderStateCheckLogic> _logger;
 
-        public OrderStateCheckLogic(IOkxApiWrapper apiService, ILogger<OrderStateCheckLogic> logger)
+        public OrderStateCheckLogic(IOkxApiWrapper apiWrapper, ILogger<OrderStateCheckLogic> logger)
         {
-            _apiService = apiService;
+            _apiWrapper = apiWrapper;
             _logger = logger;
         }
         public async Task<bool> CanKeepOrderPerp(string symbol, OKEXOrder perpOrder, decimal spreadThreshold, bool open)
         {
-            string perpInstrumnet = _apiService.GetPerpInstrument(symbol);
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 20, 100);
-            var perpOrderBook = await _apiService.GetOrderBook(perpInstrumnet, 20, 100);
+            string perpInstrumnet = _apiWrapper.GetPerpInstrument(symbol);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            var spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
+            var perpOrderBook = await _apiWrapper.GetOrderBook(perpInstrumnet);
+            _apiWrapper.SetWait(500);
             if (perpOrderBook == null || spotOrderBook == null)
             {
                 _logger.LogError("Failed to get order books to check order status for {symbol}", symbol);
@@ -49,8 +44,9 @@ namespace OkxPerpetualArbitrage.Application.Services
         }
         public async Task<bool> IsSpotBelowMid(string symbol, OKEXOrder spotOrder, PotentialPosition pp)
         {
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 20, 500);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            _apiWrapper.SetWait(500);
+            var spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
             if (spotOrderBook == null)
             {
                 _logger.LogError("Failed to get spot order books to check order for {symbol}", symbol);
@@ -70,8 +66,9 @@ namespace OkxPerpetualArbitrage.Application.Services
 
         public async Task<bool> IsSpotAboveMid(string symbol, OKEXOrder spotOrder, PotentialPosition pp)
         {
-            string spotInstrumnet = _apiService.GetSpotInstrument(symbol);
-            var spotOrderBook = await _apiService.GetOrderBook(spotInstrumnet, 20, 500);
+            string spotInstrumnet = _apiWrapper.GetSpotInstrument(symbol);
+            _apiWrapper.SetWait(500);
+            var spotOrderBook = await _apiWrapper.GetOrderBook(spotInstrumnet);
             if (spotOrderBook == null)
             {
                 _logger.LogError("Failed to get spot order books to check order for {symbol}", symbol);

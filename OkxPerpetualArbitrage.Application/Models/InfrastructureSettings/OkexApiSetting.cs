@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OkxPerpetualArbitrage.Application.Models.InfrastructureSettings
+﻿namespace OkxPerpetualArbitrage.Application.Models.InfrastructureSettings
 {
     public class OkexApiSetting
     {

@@ -1,22 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
-using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Logic;
+using OkxPerpetualArbitrage.Application.Contracts.OkxApi;
 using OkxPerpetualArbitrage.Application.Contracts.Persistance;
 using OkxPerpetualArbitrage.Application.Exceptions;
-using OkxPerpetualArbitrage.Application.Features.Joined.Commands;
 using OkxPerpetualArbitrage.Application.Models.DTOs;
 using OkxPerpetualArbitrage.Domain.Entities;
 using OkxPerpetualArbitrage.Domain.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OkxPerpetualArbitrage.Application.Services
 {
-
-
     public class PositionOpenCloseChannelWriterLogic : IPositionOpenCloseChannelWriterLogic
     {
         private readonly IClosePositionProcessingChannel _closePositionProcessingChannel;
@@ -123,10 +115,5 @@ namespace OkxPerpetualArbitrage.Application.Services
 
             return new ApiCommandResponseDto() { Success = true, Message = "Close request has been submitted successfuly" };
         }
-
-
-
-
-
     }
 }
