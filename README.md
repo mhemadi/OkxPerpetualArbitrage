@@ -15,6 +15,7 @@ This app lets you see current potential positions that can be opened, and once c
 * Create a subaccount on Okx exchange. (Do not use your main account as the app may interfere with your positions)
 * Create an api key for your subaccount
 * Enter the key in the appsettings.json
+* Make sure the database folder exists and run migrations using update-database
 * Run the webapi app and consume the api using a client of your choice or use the BlazorUIExample project
 	
 ## Api Methods
